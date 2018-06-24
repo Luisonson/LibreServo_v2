@@ -1,0 +1,13 @@
+stm32f3xx_ll_tim.c:252:13:LL_TIM_DeInit	0	static
+stm32f3xx_ll_tim.c:393:6:LL_TIM_StructInit	0	static
+stm32f3xx_ll_tim.c:411:13:LL_TIM_Init	8	static
+stm32f3xx_ll_tim.c:462:6:LL_TIM_OC_StructInit	0	static
+stm32f3xx_ll_tim.c:491:13:LL_TIM_OC_Init	12	static
+stm32f3xx_ll_tim.c:530:6:LL_TIM_IC_StructInit	0	static
+stm32f3xx_ll_tim.c:552:13:LL_TIM_IC_Init	12	static
+stm32f3xx_ll_tim.c:582:6:LL_TIM_ENCODER_StructInit	0	static
+stm32f3xx_ll_tim.c:604:13:LL_TIM_ENCODER_Init	12	static
+stm32f3xx_ll_tim.c:667:6:LL_TIM_HALLSENSOR_StructInit	0	static
+stm32f3xx_ll_tim.c:696:13:LL_TIM_HALLSENSOR_Init	20	static
+stm32f3xx_ll_tim.c:775:6:LL_TIM_BDTR_StructInit	0	static
+stm32f3xx_ll_tim.c:811:13:LL_TIM_BDTR_Init	0	static

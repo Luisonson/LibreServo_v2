@@ -1,0 +1,15 @@
+stm32f3xx_it.c:50:6:NMI_Handler	0	static
+stm32f3xx_it.c:63:6:HardFault_Handler	0	static
+stm32f3xx_it.c:81:6:MemManage_Handler	0	static
+stm32f3xx_it.c:99:6:BusFault_Handler	0	static
+stm32f3xx_it.c:117:6:UsageFault_Handler	0	static
+stm32f3xx_it.c:135:6:SVC_Handler	0	static
+stm32f3xx_it.c:148:6:DebugMon_Handler	0	static
+stm32f3xx_it.c:161:6:PendSV_Handler	0	static
+stm32f3xx_it.c:174:6:SysTick_Handler	0	static
+stm32f3xx_it.c:195:6:DMA1_Channel1_IRQHandler	0	static
+stm32f3xx_it.c:209:6:DMA1_Channel4_IRQHandler	0	static
+stm32f3xx_it.c:223:6:DMA1_Channel5_IRQHandler	0	static
+stm32f3xx_it.c:237:6:DMA1_Channel6_IRQHandler	0	static
+stm32f3xx_it.c:251:6:USART1_IRQHandler	0	static
+stm32f3xx_it.c:264:6:USART2_IRQHandler	0	static

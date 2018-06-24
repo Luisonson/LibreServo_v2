@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Project>
+<ProjectName>D:\users\E013171\Documents\CubeMX\LibreServoV1\Libre Servo v1\\Libre Servo v1</ProjectName>
+<ProjectNature>C</ProjectNature> 
+<CMSIS>..\Drivers\CMSIS</CMSIS>
+<HAL_Driver>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\CMSIS</HAL_Driver>
+<Toolchain>TrueSTUDIO</Toolchain>
+<Version>0</Version>
+
+<filestoremove>
+    <file>
+    <name>..\Src\stm32f3xx_hal_msp.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_adc.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_adc_ex.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_tim.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_tim_ex.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_uart.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_uart_ex.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_rcc.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_rcc_ex.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_gpio.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_dma.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_cortex.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_pwr.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_pwr_ex.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_flash.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_flash_ex.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_i2c.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Src\stm32f3xx_hal_i2c_ex.c</name>
+    <name>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\CMSIS\Device\ST\STM32F3xx\Source\Templates\system_stm32f3xx.c</name>
+    <name>D:\users\E013171\Documents\CubeMX\LibreServoV1\Libre Servo v1\\\startup\startup_stm32f302x8.s</name>
+    </file>
+</filestoremove>
+
+<inctoremove>
+	<Aincludes>
+	   <include></include>
+    </Aincludes>
+	<Cincludes>
+	   		<include>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Inc</include>
+	   		<include>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\STM32F3xx_HAL_Driver\Inc\Legacy</include>
+	   		<include>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\CMSIS\Device\ST\STM32F3xx\Include</include>
+	   		<include>d:\users\E013171\STM32Cube\Repository\STM32Cube_FW_F3_V1.9.1\Drivers\CMSIS\Include</include>
+    </Cincludes>
+</inctoremove>
+
+<configs>
+  <config>
+    <name>Libre Servo v1</name>				
+    <device>STM32F302K8Ux</device>		 
+    <heapSize>0x200</heapSize>
+    <stackSize>0x400</stackSize>
+    
+    	<board>custom</board>
+			
+    <usedDebug>true</usedDebug>
+    	<debugprobe></debugprobe>
+    <optimization></optimization>
+    <icfloc>0</icfloc>
+    <Adefines>
+        <define></define>
+    </Adefines>   
+
+    <UsedFreeRTOS></UsedFreeRTOS>
+    <Aincludes>
+
+
+	    	<include></include>
+    </Aincludes>
+    <Cdefines>
+        <define>USE_FULL_LL_DRIVER</define>
+        <define>__weak=__attribute__((weak))</define>
+        <define>__packed=__attribute__((__packed__))</define>
+    </Cdefines>
+    <definestoremove>
+        <Adefines>
+            <define></define>
+        </Adefines>
+        <Cdefines>
+            <define>USE_HAL_DRIVER</define>
+            <define>MBEDTLS_CONFIG_FILE=&quot;mbedtls_config.h&quot;</define>
+        </Cdefines>         
+    </definestoremove>
+    
+	<Cincludes>
+	   <include>..\Inc</include>
+	   <include>..\Drivers\STM32F3xx_HAL_Driver\Inc</include>
+	   <include>..\Drivers\CMSIS\Device\ST\STM32F3xx\Include</include>
+	   <include>..\Drivers\CMSIS\Include</include>
+
+    </Cincludes>
+      </config>
+    </configs> 
+
+    <underRoot>true</underRoot>
+    	<copyAsReference>false</copyAsReference>
+ 
+	  		<sourceEntries>
+		    	<sourceEntry>
+		    		<name>Inc</name>
+		    	</sourceEntry>
+                <sourceEntry>
+                        <name>Src</name>
+                </sourceEntry>
+		    	<sourceEntry>
+		    		<name>Drivers</name>
+		    	</sourceEntry>
+		    </sourceEntries>
+
+</Project>
