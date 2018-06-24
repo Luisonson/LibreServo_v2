@@ -133,13 +133,13 @@ int main(void)
   {
 //LL_GPIO_TogglePin(GPIOA,LL_GPIO_PIN_2);
 	  GPIOA->ODR ^= LL_GPIO_PIN_2;
-	  Delay_ms(1000);
+	  Delay_ms(500);
 	  GPIOA->ODR ^= LL_GPIO_PIN_2;
 	  GPIOA->ODR ^= LL_GPIO_PIN_3;
-	  Delay_ms(1000);
+	  Delay_ms(500);
 	  GPIOA->ODR ^= LL_GPIO_PIN_3;
 	  GPIOA->ODR ^= LL_GPIO_PIN_4;
-	  Delay_ms(1000);
+	  Delay_ms(500);
 	  GPIOA->ODR ^= LL_GPIO_PIN_4;
   /* USER CODE END WHILE */
 

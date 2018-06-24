@@ -1439,7 +1439,7 @@ static void Delay_ms(__IO uint32_t nCount)
 	SysTick->LOAD=72000-1;
  80009a2:	4a07      	ldr	r2, [pc, #28]	; (80009c0 <Delay_ms.constprop.1+0x20>)
  80009a4:	4907      	ldr	r1, [pc, #28]	; (80009c4 <Delay_ms.constprop.1+0x24>)
- 80009a6:	f44f 737a 	mov.w	r3, #1000	; 0x3e8
+ 80009a6:	f44f 73fa 	mov.w	r3, #500	; 0x1f4
 	SysTick->VAL=0;
  80009aa:	2000      	movs	r0, #0
 {
@@ -2626,7 +2626,7 @@ static void SET_PIN (GPIO_TypeDef *GPIOx, uint32_t PinMask)
  80011fc:	696b      	ldr	r3, [r5, #20]
  80011fe:	f083 0304 	eor.w	r3, r3, #4
  8001202:	616b      	str	r3, [r5, #20]
-	  Delay_ms(1000);
+	  Delay_ms(500);
  8001204:	f7ff fbcc 	bl	80009a0 <Delay_ms.constprop.1>
 	  GPIOA->ODR ^= LL_GPIO_PIN_2;
  8001208:	696b      	ldr	r3, [r5, #20]
@@ -2636,7 +2636,7 @@ static void SET_PIN (GPIO_TypeDef *GPIOx, uint32_t PinMask)
  8001210:	696b      	ldr	r3, [r5, #20]
  8001212:	f083 0308 	eor.w	r3, r3, #8
  8001216:	616b      	str	r3, [r5, #20]
-	  Delay_ms(1000);
+	  Delay_ms(500);
  8001218:	f7ff fbc2 	bl	80009a0 <Delay_ms.constprop.1>
 	  GPIOA->ODR ^= LL_GPIO_PIN_3;
  800121c:	696b      	ldr	r3, [r5, #20]
@@ -2646,7 +2646,7 @@ static void SET_PIN (GPIO_TypeDef *GPIOx, uint32_t PinMask)
  8001224:	696b      	ldr	r3, [r5, #20]
  8001226:	f083 0310 	eor.w	r3, r3, #16
  800122a:	616b      	str	r3, [r5, #20]
-	  Delay_ms(1000);
+	  Delay_ms(500);
  800122c:	f7ff fbb8 	bl	80009a0 <Delay_ms.constprop.1>
 	  GPIOA->ODR ^= LL_GPIO_PIN_4;
  8001230:	696b      	ldr	r3, [r5, #20]
