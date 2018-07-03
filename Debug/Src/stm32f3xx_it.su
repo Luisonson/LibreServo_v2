@@ -11,5 +11,6 @@ stm32f3xx_it.c:195:6:DMA1_Channel1_IRQHandler	0	static
 stm32f3xx_it.c:209:6:DMA1_Channel4_IRQHandler	0	static
 stm32f3xx_it.c:223:6:DMA1_Channel5_IRQHandler	0	static
 stm32f3xx_it.c:237:6:DMA1_Channel6_IRQHandler	0	static
-stm32f3xx_it.c:251:6:USART1_IRQHandler	0	static
-stm32f3xx_it.c:264:6:USART2_IRQHandler	0	static
+stm32f3xx_it.c:251:6:TIM1_TRG_COM_TIM17_IRQHandler	0	static
+stm32f3xx_it.c:270:6:USART1_IRQHandler	0	static
+stm32f3xx_it.c:283:6:USART2_IRQHandler	0	static

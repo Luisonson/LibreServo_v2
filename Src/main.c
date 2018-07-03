@@ -120,6 +120,7 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
+  LL_TIM_EnableIT_UPDATE(TIM17);
 
   SET_PIN(GPIOA,LL_GPIO_PIN_2);
   SET_PIN(GPIOA,LL_GPIO_PIN_3);
@@ -132,7 +133,7 @@ int main(void)
   while (1)
   {
 //LL_GPIO_TogglePin(GPIOA,LL_GPIO_PIN_2);
-	  GPIOA->ODR ^= LL_GPIO_PIN_2;
+	  /*GPIOA->ODR ^= LL_GPIO_PIN_2;
 	  Delay_ms(500);
 	  GPIOA->ODR ^= LL_GPIO_PIN_2;
 	  GPIOA->ODR ^= LL_GPIO_PIN_3;
@@ -140,7 +141,7 @@ int main(void)
 	  GPIOA->ODR ^= LL_GPIO_PIN_3;
 	  GPIOA->ODR ^= LL_GPIO_PIN_4;
 	  Delay_ms(500);
-	  GPIOA->ODR ^= LL_GPIO_PIN_4;
+	  GPIOA->ODR ^= LL_GPIO_PIN_4;*/
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
@@ -155,6 +156,7 @@ static void LL_Init(void)
   
 
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_SYSCFG);
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_PWR);
 
   NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
 
@@ -264,6 +266,9 @@ static void MX_NVIC_Init(void)
   /* USART2_IRQn interrupt configuration */
   NVIC_SetPriority(USART2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
   NVIC_EnableIRQ(USART2_IRQn);
+  /* TIM1_TRG_COM_TIM17_IRQn interrupt configuration */
+  NVIC_SetPriority(TIM1_TRG_COM_TIM17_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(TIM1_TRG_COM_TIM17_IRQn);
 }
 
 /* ADC1 init function */
@@ -518,10 +523,10 @@ static void MX_TIM17_Init(void)
   /* Peripheral clock enable */
   LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM17);
 
-  TIM_InitStruct.Prescaler = 0;
+  TIM_InitStruct.Prescaler = 586;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
   TIM_InitStruct.Autoreload = 0;
-  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV4;
   TIM_InitStruct.RepetitionCounter = 0;
   LL_TIM_Init(TIM17, &TIM_InitStruct);
 

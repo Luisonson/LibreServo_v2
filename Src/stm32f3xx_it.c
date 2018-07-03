@@ -246,6 +246,25 @@ void DMA1_Channel6_IRQHandler(void)
 }
 
 /**
+* @brief This function handles TIM1 trigger, commutation and TIM17 interrupts.
+*/
+void TIM1_TRG_COM_TIM17_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM1_TRG_COM_TIM17_IRQn 0 */
+	if(LL_TIM_IsActiveFlag_UPDATE(TIM17)==1)
+	{
+		LL_TIM_ClearFlag_UPDATE(TIM17);
+		GPIOA->ODR ^= LL_GPIO_PIN_2;
+	}
+
+  /* USER CODE END TIM1_TRG_COM_TIM17_IRQn 0 */
+  
+  /* USER CODE BEGIN TIM1_TRG_COM_TIM17_IRQn 1 */
+
+  /* USER CODE END TIM1_TRG_COM_TIM17_IRQn 1 */
+}
+
+/**
 * @brief This function handles USART1 global interrupt / USART1 wake-up interrupt through EXTI line 25.
 */
 void USART1_IRQHandler(void)
