@@ -121,6 +121,7 @@ int main(void)
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
   LL_TIM_EnableIT_UPDATE(TIM17);
+  LL_TIM_EnableCounter(TIM17);
 
   SET_PIN(GPIOA,LL_GPIO_PIN_2);
   SET_PIN(GPIOA,LL_GPIO_PIN_3);
@@ -132,6 +133,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  Delay_ms(500);
 //LL_GPIO_TogglePin(GPIOA,LL_GPIO_PIN_2);
 	  /*GPIOA->ODR ^= LL_GPIO_PIN_2;
 	  Delay_ms(500);
