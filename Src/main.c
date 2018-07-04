@@ -75,7 +75,10 @@ static uint32_t READ_PIN (GPIO_TypeDef *GPIOx, uint32_t PinMask);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-
+struct s_led_rgb {uint32_t pin[3];uint8_t brillo[3];};
+volatile struct s_led_rgb led_rgb = {
+	{LL_GPIO_PIN_2,LL_GPIO_PIN_3,LL_GPIO_PIN_4} ,
+	{0,0,0} };
 /* USER CODE END 0 */
 
 /**
@@ -123,9 +126,9 @@ int main(void)
   LL_TIM_EnableIT_UPDATE(TIM17);
   LL_TIM_EnableCounter(TIM17);
 
-  SET_PIN(GPIOA,LL_GPIO_PIN_2);
+  /*SET_PIN(GPIOA,LL_GPIO_PIN_2);
   SET_PIN(GPIOA,LL_GPIO_PIN_3);
-  SET_PIN(GPIOA,LL_GPIO_PIN_4);
+  SET_PIN(GPIOA,LL_GPIO_PIN_4);*/
 
   /* USER CODE END 2 */
 
