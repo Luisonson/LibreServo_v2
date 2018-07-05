@@ -35,7 +35,23 @@
 #include "stm32f3xx_it.h"
 
 /* USER CODE BEGIN 0 */
+typedef enum
+{
+  FALSE = 0,
+  TRUE = !FALSE
+} boolean;
 
+#define LED_GREEN LL_GPIO_PIN_2
+#define LED_RED LL_GPIO_PIN_3
+#define LED_BLUE LL_GPIO_PIN_4
+
+extern volatile int brillado_led_rgb;
+extern volatile int estado_led;
+extern volatile uint8_t new_led_rgb;
+
+struct s_led_rgb {uint32_t pin[3];uint8_t brillo[3];};
+extern volatile struct s_led_rgb led_rgb;
+extern volatile struct s_led_rgb led_rgb_temp;
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -251,10 +267,70 @@ void DMA1_Channel6_IRQHandler(void)
 void TIM1_TRG_COM_TIM17_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_TRG_COM_TIM17_IRQn 0 */
-	if(LL_TIM_IsActiveFlag_UPDATE(TIM17)==1)
+	if(LL_TIM_IsActiveFlag_UPDATE(TIM17)==TRUE)
 	{
 		LL_TIM_ClearFlag_UPDATE(TIM17);
-		GPIOA->ODR ^= LL_GPIO_PIN_2;
+
+		if(estado_led==2||brillado_led_rgb>=255)
+		{
+			GPIOA->BSRR=LED_GREEN;			//Set_pin
+			GPIOA->BSRR=LED_RED;			//Set_pin
+			GPIOA->BSRR=LED_BLUE;			//Set_pin
+			estado_led=0;
+			brillado_led_rgb=0;
+
+			if(new_led_rgb==TRUE)							//Copy the new LED configuration
+			{
+				new_led_rgb=FALSE;
+				for(int i_a=0;i_a<3;i_a++)
+				{
+					led_rgb.pin[i_a]=led_rgb_temp.pin[i_a];
+					led_rgb.brillo[i_a]=led_rgb_temp.brillo[i_a];
+				}
+			}
+		}
+		else
+		{
+			GPIOA->BSRR=led_rgb.pin[estado_led];			//Set_pin
+			estado_led++;
+		}
+
+		if(estado_led==0)
+		{
+			if(led_rgb.brillo[0]<255)
+			{
+				GPIOA->BRR=LED_GREEN;				//Clear_pin
+				GPIOA->BRR=LED_RED;					//Clear_pin
+				GPIOA->BRR=LED_BLUE;				//Clear_pin
+			}
+			else if(led_rgb.brillo[1]<255)
+			{
+				estado_led=1;
+				GPIOA->BRR=led_rgb.pin[1];			//Clear_pin
+				GPIOA->BRR=led_rgb.pin[2];			//Clear_pin
+			}
+			else if(led_rgb.brillo[2]<255)
+			{
+				estado_led=2;
+				GPIOA->BRR=led_rgb.pin[2];			//Clear_pin
+			}
+			else
+			{
+				estado_led=-1;
+			}
+		}
+
+		brillado_led_rgb=brillado_led_rgb+(255-led_rgb.brillo[estado_led]);
+
+		if(estado_led>=0)
+		{
+			TIM17->CNT=led_rgb.brillo[estado_led];
+		}
+		else
+		{
+			estado_led=2;
+			TIM17->CNT=0;
+		}
 	}
 
   /* USER CODE END TIM1_TRG_COM_TIM17_IRQn 0 */

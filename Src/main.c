@@ -47,6 +47,31 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
+typedef enum
+{
+  FALSE = 0,
+  TRUE = !FALSE
+} boolean;
+
+#define LED_GREEN LL_GPIO_PIN_2
+#define LED_RED LL_GPIO_PIN_3
+#define LED_BLUE LL_GPIO_PIN_4
+
+struct s_led_rgb {uint32_t pin[3];uint8_t brillo[3];};
+extern volatile struct s_led_rgb led_rgb;
+volatile struct s_led_rgb led_rgb = {			//The actual state
+	{LED_GREEN,LED_RED,LED_BLUE} ,
+	{255,0,0} };								//The three leds must sum 255, if the first led is already 255 means everything is shutdown
+extern volatile struct s_led_rgb led_rgb_temp;
+volatile struct s_led_rgb led_rgb_temp = {		//The next loop state
+	{LED_GREEN,LED_RED,LED_BLUE} ,
+	{255,0,0} };
+extern volatile int estado_led;						//Which Led is shining
+volatile int estado_led=0;
+extern volatile uint8_t new_led_rgb;
+volatile uint8_t new_led_rgb=FALSE;
+extern volatile int brillado_led_rgb;
+volatile int brillado_led_rgb=0;
 
 /* USER CODE END PV */
 
@@ -72,13 +97,11 @@ static void SET_PIN (GPIO_TypeDef *GPIOx, uint32_t PinMask);
 static void CLEAR_PIN (GPIO_TypeDef *GPIOx, uint32_t PinMask);
 static void FLIP_PIN (GPIO_TypeDef *GPIOx, uint32_t PinMask);
 static uint32_t READ_PIN (GPIO_TypeDef *GPIOx, uint32_t PinMask);
+static void F_LED_RGB(uint8_t Z_RED, uint8_t Z_GREEN, uint8_t Z_BLUE);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-struct s_led_rgb {uint32_t pin[3];uint8_t brillo[3];};
-volatile struct s_led_rgb led_rgb = {
-	{LL_GPIO_PIN_2,LL_GPIO_PIN_3,LL_GPIO_PIN_4} ,
-	{0,0,0} };
+
 /* USER CODE END 0 */
 
 /**
@@ -123,8 +146,8 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  LL_TIM_EnableIT_UPDATE(TIM17);
-  LL_TIM_EnableCounter(TIM17);
+  LL_TIM_EnableIT_UPDATE(TIM17);		//Enable the Update interrupt in TIM17 (TIM17->DIER.UIE ---> TIM17->SR.UIF)
+  LL_TIM_EnableCounter(TIM17);			//Timer17 starts running (TIM17->CR1.CEN)
 
   /*SET_PIN(GPIOA,LL_GPIO_PIN_2);
   SET_PIN(GPIOA,LL_GPIO_PIN_3);
@@ -134,9 +157,15 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  uint8_t B_R=0,B_G=0,B_B=0;
   while (1)
   {
-	  Delay_ms(500);
+	  Delay_ms(10);
+	  B_R++;
+	  B_G=B_G+2;
+	  B_B=B_B+3;
+	  F_LED_RGB(B_R,B_G,B_B);
 //LL_GPIO_TogglePin(GPIOA,LL_GPIO_PIN_2);
 	  /*GPIOA->ODR ^= LL_GPIO_PIN_2;
 	  Delay_ms(500);
@@ -790,6 +819,41 @@ static void FLIP_PIN (GPIO_TypeDef *GPIOx, uint32_t PinMask)
 static uint32_t READ_PIN (GPIO_TypeDef *GPIOx, uint32_t PinMask)
 {
 	return (READ_BIT(GPIOx->ODR, PinMask) == (PinMask));
+}
+
+static void F_LED_RGB(uint8_t Z_RED, uint8_t Z_GREEN, uint8_t Z_BLUE)
+{
+	led_rgb_temp = (struct s_led_rgb){
+		{LED_RED,LED_GREEN,LED_BLUE} ,
+		{Z_RED,Z_GREEN,Z_BLUE} };
+	uint8_t z_brillo;
+	uint32_t z_pin;
+
+	for(int a=0;a<=1;a++)
+	{
+		for(int b=a+1;b<=2;b++)
+		{
+			if(led_rgb_temp.brillo[a]>led_rgb_temp.brillo[b])				//Order from less to more brightness
+			{
+				z_brillo=led_rgb_temp.brillo[a];
+				z_pin=led_rgb_temp.pin[a];
+				led_rgb_temp.brillo[a]=led_rgb_temp.brillo[b];
+				led_rgb_temp.pin[a]=led_rgb_temp.pin[b];
+				led_rgb_temp.brillo[b]=z_brillo;
+				led_rgb_temp.pin[b]=z_pin;
+			}
+		}
+	}
+	for(int a=0;a<3;a++)
+	{
+		led_rgb_temp.brillo[a]=255-led_rgb_temp.brillo[a];
+	}
+	for(int a=1;a<3;a++)
+	{
+		led_rgb_temp.brillo[a]=led_rgb_temp.brillo[a]+(255-led_rgb_temp.brillo[0]);
+	}
+	led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]+(255-led_rgb_temp.brillo[1]);
+	new_led_rgb=TRUE;
 }
 /* USER CODE END 4 */
 
