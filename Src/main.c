@@ -150,16 +150,30 @@ int main(void)
   LL_TIM_EnableIT_UPDATE(TIM17);		//Enable the Update interrupt in TIM17 (TIM17->DIER.UIE ---> TIM17->SR.UIF)
 
 
-  /*SET_PIN(GPIOA,LL_GPIO_PIN_2);
-  SET_PIN(GPIOA,LL_GPIO_PIN_3);
-  SET_PIN(GPIOA,LL_GPIO_PIN_4);*/
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
   uint8_t B_R=0,B_G=0,B_B=0;
+  F_LED_RGB(255,0,0);
+  Delay_ms(500);
+  F_LED_RGB(0,255,0);
+  Delay_ms(500);
+  F_LED_RGB(0,0,255);
+  Delay_ms(500);
+  for(unit8_t i=0; i<255;i++)
+  {
+	  F_LED_RGB(i,i,i);
+	  Delay_ms(10);
+  }
+  for(unit8_t i=255; i>0;i--)
+  {
+	  F_LED_RGB(i,i,i);
+	  Delay_ms(10);
+  }
+  F_LED_RGB(0,0,0);
+  Delay_ms(500);
   while (1)
   {
 	  Delay_ms(20);
@@ -845,16 +859,11 @@ static void F_LED_RGB(uint8_t Z_RED, uint8_t Z_GREEN, uint8_t Z_BLUE)
 			}
 		}
 	}
-	/*for(int a=0;a<3;a++)
-	{
-		led_rgb_temp.brillo[a]=255-led_rgb_temp.brillo[a];
-	}*/
+
 	for(int a=1;a<3;a++)
 	{
-		//led_rgb_temp.brillo[a]=led_rgb_temp.brillo[a]+(255-led_rgb_temp.brillo[0]);
 		led_rgb_temp.brillo[a]=led_rgb_temp.brillo[a]-(led_rgb_temp.brillo[0]);
 	}
-	//led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]+(255-led_rgb_temp.brillo[1]);
 	led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]-led_rgb_temp.brillo[1];
 
 	for(int a=0;a<3;a++)
