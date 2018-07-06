@@ -67,7 +67,7 @@ volatile struct s_led_rgb led_rgb_temp = {		//The next loop state
 	{LED_GREEN,LED_RED,LED_BLUE} ,
 	{255,0,0} };
 extern volatile int estado_led;						//Which Led is shining
-volatile int estado_led=0;
+volatile int estado_led=2;
 extern volatile uint8_t new_led_rgb;
 volatile uint8_t new_led_rgb=TRUE;
 extern volatile int brillado_led_rgb;
@@ -162,8 +162,8 @@ int main(void)
   uint8_t B_R=0,B_G=0,B_B=0;
   while (1)
   {
-	  Delay_ms(10);
-	  B_R++;
+	  Delay_ms(20);
+	  B_R=B_R+1;
 	  B_G=B_G+2;
 	  B_B=B_B+3;
 	  F_LED_RGB(B_R,B_G,B_B);
@@ -560,7 +560,7 @@ static void MX_TIM17_Init(void)
 
   TIM_InitStruct.Prescaler = 586;
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
-  TIM_InitStruct.Autoreload = 0;
+  TIM_InitStruct.Autoreload = 255;
   TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV4;
   TIM_InitStruct.RepetitionCounter = 0;
   LL_TIM_Init(TIM17, &TIM_InitStruct);
@@ -856,6 +856,11 @@ static void F_LED_RGB(uint8_t Z_RED, uint8_t Z_GREEN, uint8_t Z_BLUE)
 	}
 	//led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]+(255-led_rgb_temp.brillo[1]);
 	led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]-led_rgb_temp.brillo[1];
+
+	for(int a=0;a<3;a++)
+	{
+		led_rgb_temp.brillo[a]=255-led_rgb_temp.brillo[a];
+	}
 	new_led_rgb=TRUE;
 }
 /* USER CODE END 4 */

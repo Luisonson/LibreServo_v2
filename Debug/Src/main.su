@@ -5,4 +5,4 @@ stm32f3xx_ll_bus.h:867:22:LL_APB2_GRP1_EnableClock	8	static
 core_cm4.h:1745:26:NVIC_EncodePriority.constprop	0	static
 main.c:220:6:SystemClock_Config	8	static
 main.c:112:5:main	160	static
-main.c:869:6:_Error_Handler	0	static
+main.c:874:6:_Error_Handler	0	static

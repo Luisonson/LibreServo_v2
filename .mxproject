@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=D:/users/E013171/Documents/CubeMX/LibreServoV1/Libre Servo v1/Inc
+HeaderPath=C:/Users/Luisón/Documents/CubeMX/Libre Servo v1/Inc
 HeaderFiles=stm32f3xx_it.h;stm32f3xx_hal_conf.h;main.h;stm32_assert.h;
-SourcePath=D:/users/E013171/Documents/CubeMX/LibreServoV1/Libre Servo v1/Src
+SourcePath=C:/Users/Luisón/Documents/CubeMX/Libre Servo v1/Src
 SourceFiles=stm32f3xx_it.c;stm32f3xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]
@@ -13,7 +13,7 @@ HeaderPath=..\Drivers\STM32F3xx_HAL_Driver\Inc;..\Drivers\STM32F3xx_HAL_Driver\I
 CDefines=__weak:__attribute__((weak));__packed:__attribute__((__packed__));
 
 [PreviousUsedTStudioFiles]
-SourceFiles=..\Src\main.c;..\Src\stm32f3xx_it.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_utils.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_exti.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_gpio.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_exti.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_adc.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_dma.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_tim.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_usart.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_rcc.c;../\Src/system_stm32f3xx.c;../Drivers/CMSIS/Device/ST/STM32F3xx/Source/Templates/system_stm32f3xx.c;D:/users/E013171/Documents/CubeMX/LibreServoV1/Libre Servo v1///startup/startup_stm32f302x8.s;
+SourceFiles=..\Src\main.c;..\Src\stm32f3xx_it.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_utils.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_exti.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_gpio.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_exti.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_adc.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_dma.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_tim.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_usart.c;../Drivers/STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_rcc.c;../\Src/system_stm32f3xx.c;../Drivers/CMSIS/Device/ST/STM32F3xx/Source/Templates/system_stm32f3xx.c;null;
 HeaderPath=..\Drivers\STM32F3xx_HAL_Driver\Inc;..\Drivers\CMSIS\Device\ST\STM32F3xx\Include;..\Drivers\CMSIS\Include;..\Inc;
-CDefines=USE_FULL_LL_DRIVER;__weak:__attribute__((weak));__packed:__attribute__((__packed__));
+CDefines=USE_FULL_LL_DRIVER;HSE_VALUE:8000000;HSE_STARTUP_TIMEOUT:100;LSE_STARTUP_TIMEOUT:5000;LSE_VALUE:32768;EXTERNAL_CLOCK_VALUE:8000000;HSI_VALUE:8000000;LSI_VALUE:40000;VDD_VALUE:3300;PREFETCH_ENABLE:1;__weak:__attribute__((weak));__packed:__attribute__((__packed__));
 
