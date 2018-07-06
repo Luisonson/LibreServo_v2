@@ -276,7 +276,7 @@ void TIM1_TRG_COM_TIM17_IRQHandler(void)
 			GPIOA->BSRR=LED_GREEN;			//Set_pin
 			GPIOA->BSRR=LED_RED;			//Set_pin
 			GPIOA->BSRR=LED_BLUE;			//Set_pin
-			if(brillando_led_rgb>=255)
+			if(brillado_led_rgb>=255)
 			{
 				estado_led=0;
 				brillado_led_rgb=0;
@@ -293,8 +293,8 @@ void TIM1_TRG_COM_TIM17_IRQHandler(void)
 			}
 			else
 			{
-				TIM17->CNT=255-brillando_led_rgb;
-				brillando_led_rgb=255;
+				TIM17->CNT=255-brillado_led_rgb;
+				brillado_led_rgb=255;
 			}
 		}
 		else

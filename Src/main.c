@@ -162,12 +162,12 @@ int main(void)
   Delay_ms(500);
   F_LED_RGB(0,0,255);
   Delay_ms(500);
-  for(unit8_t i=0; i<255;i++)
+  for(uint8_t i=0; i<255;i++)
   {
 	  F_LED_RGB(i,i,i);
 	  Delay_ms(10);
   }
-  for(unit8_t i=255; i>0;i--)
+  for(uint8_t i=255; i>0;i--)
   {
 	  F_LED_RGB(i,i,i);
 	  Delay_ms(10);
@@ -866,10 +866,10 @@ static void F_LED_RGB(uint8_t Z_RED, uint8_t Z_GREEN, uint8_t Z_BLUE)
 	}
 	led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]-led_rgb_temp.brillo[1];
 
-	for(int a=0;a<3;a++)
+	/*for(int a=0;a<3;a++)
 	{
 		led_rgb_temp.brillo[a]=255-led_rgb_temp.brillo[a];
-	}
+	}*/
 	new_led_rgb=TRUE;
 }
 /* USER CODE END 4 */
