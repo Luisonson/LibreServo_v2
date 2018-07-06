@@ -61,7 +61,7 @@ struct s_led_rgb {uint32_t pin[3];uint8_t brillo[3];};
 extern volatile struct s_led_rgb led_rgb;
 volatile struct s_led_rgb led_rgb = {			//The actual state
 	{LED_GREEN,LED_RED,LED_BLUE} ,
-	{255,0,0} };								//The three leds must sum 255, if the first led is already 255 means everything is shutdown
+	{210,10,10} };								//The three leds must sum 255, if the first led is already 255 means everything is shutdown
 extern volatile struct s_led_rgb led_rgb_temp;
 volatile struct s_led_rgb led_rgb_temp = {		//The next loop state
 	{LED_GREEN,LED_RED,LED_BLUE} ,
@@ -69,7 +69,7 @@ volatile struct s_led_rgb led_rgb_temp = {		//The next loop state
 extern volatile int estado_led;						//Which Led is shining
 volatile int estado_led=0;
 extern volatile uint8_t new_led_rgb;
-volatile uint8_t new_led_rgb=FALSE;
+volatile uint8_t new_led_rgb=TRUE;
 extern volatile int brillado_led_rgb;
 volatile int brillado_led_rgb=0;
 
@@ -146,8 +146,9 @@ int main(void)
   /* Initialize interrupts */
   MX_NVIC_Init();
   /* USER CODE BEGIN 2 */
-  LL_TIM_EnableIT_UPDATE(TIM17);		//Enable the Update interrupt in TIM17 (TIM17->DIER.UIE ---> TIM17->SR.UIF)
   LL_TIM_EnableCounter(TIM17);			//Timer17 starts running (TIM17->CR1.CEN)
+  LL_TIM_EnableIT_UPDATE(TIM17);		//Enable the Update interrupt in TIM17 (TIM17->DIER.UIE ---> TIM17->SR.UIF)
+
 
   /*SET_PIN(GPIOA,LL_GPIO_PIN_2);
   SET_PIN(GPIOA,LL_GPIO_PIN_3);
@@ -844,15 +845,17 @@ static void F_LED_RGB(uint8_t Z_RED, uint8_t Z_GREEN, uint8_t Z_BLUE)
 			}
 		}
 	}
-	for(int a=0;a<3;a++)
+	/*for(int a=0;a<3;a++)
 	{
 		led_rgb_temp.brillo[a]=255-led_rgb_temp.brillo[a];
-	}
+	}*/
 	for(int a=1;a<3;a++)
 	{
-		led_rgb_temp.brillo[a]=led_rgb_temp.brillo[a]+(255-led_rgb_temp.brillo[0]);
+		//led_rgb_temp.brillo[a]=led_rgb_temp.brillo[a]+(255-led_rgb_temp.brillo[0]);
+		led_rgb_temp.brillo[a]=led_rgb_temp.brillo[a]-(led_rgb_temp.brillo[0]);
 	}
-	led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]+(255-led_rgb_temp.brillo[1]);
+	//led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]+(255-led_rgb_temp.brillo[1]);
+	led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]-led_rgb_temp.brillo[1];
 	new_led_rgb=TRUE;
 }
 /* USER CODE END 4 */

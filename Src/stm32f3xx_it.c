@@ -324,12 +324,12 @@ void TIM1_TRG_COM_TIM17_IRQHandler(void)
 
 		if(estado_led>=0)
 		{
-			TIM17->CNT=led_rgb.brillo[estado_led];
+			//TIM17->CNT=65535-led_rgb.brillo[estado_led];
 		}
 		else
 		{
 			estado_led=2;
-			TIM17->CNT=0;
+			//TIM17->CNT=65535-255;
 		}
 	}
 
