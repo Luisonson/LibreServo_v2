@@ -293,7 +293,7 @@ void TIM1_TRG_COM_TIM17_IRQHandler(void)
 			}
 			else
 			{
-				TIM17->CNT=255-brillado_led_rgb;
+				TIM17->CNT=0+brillado_led_rgb;
 				brillado_led_rgb=255;
 			}
 		}
@@ -303,51 +303,54 @@ void TIM1_TRG_COM_TIM17_IRQHandler(void)
 			estado_led++;
 		}
 
-		if(estado_led==0)
+		if(brillado_led_rgb<255)
 		{
-			if(led_rgb.brillo[0]>0)
+			if(estado_led==0)
 			{
-				GPIOA->BRR=LED_GREEN;				//Clear_pin
-				GPIOA->BRR=LED_RED;					//Clear_pin
-				GPIOA->BRR=LED_BLUE;				//Clear_pin
+				if(led_rgb.brillo[0]>0)
+				{
+					GPIOA->BRR=LED_GREEN;				//Clear_pin
+					GPIOA->BRR=LED_RED;					//Clear_pin
+					GPIOA->BRR=LED_BLUE;				//Clear_pin
+				}
+				else if(led_rgb.brillo[1]>0)
+				{
+					estado_led=1;
+					GPIOA->BRR=led_rgb.pin[1];			//Clear_pin
+					GPIOA->BRR=led_rgb.pin[2];			//Clear_pin
+				}
+				else if(led_rgb.brillo[2]>0)
+				{
+					estado_led=2;
+					GPIOA->BRR=led_rgb.pin[2];			//Clear_pin
+				}
+				else
+				{
+					estado_led=2;
+				}
 			}
-			else if(led_rgb.brillo[1]>0)
+
+			brillado_led_rgb=brillado_led_rgb+led_rgb.brillo[estado_led];
+			if(estado_led==1)
 			{
-				estado_led=1;
-				GPIOA->BRR=led_rgb.pin[1];			//Clear_pin
-				GPIOA->BRR=led_rgb.pin[2];			//Clear_pin
+				if(led_rgb.brillo[estado_led]==0)
+				{
+					GPIOA->BSRR=led_rgb.pin[estado_led];
+					estado_led=2;
+				}
 			}
-			else if(led_rgb.brillo[2]>0)
+
+			if(led_rgb.brillo[estado_led]>0)
 			{
-				estado_led=2;
-				GPIOA->BRR=led_rgb.pin[2];			//Clear_pin
+				TIM17->CNT=255-led_rgb.brillo[estado_led];
 			}
 			else
 			{
 				estado_led=2;
-			}
-		}
-
-		brillado_led_rgb=brillado_led_rgb+led_rgb.brillo[estado_led];
-		if(estado_led==1)
-		{
-			if(led_rgb.brillo[estado_led]==0)
-			{
+				TIM17->CNT=0+brillado_led_rgb;
+				brillado_led_rgb=255;
 				GPIOA->BSRR=led_rgb.pin[estado_led];
-				estado_led=2;
 			}
-		}
-
-		if(estado_led>=0 && led_rgb.brillo[estado_led]>0)
-		{
-			TIM17->CNT=255-led_rgb.brillo[estado_led];
-		}
-		else
-		{
-			estado_led=2;
-			TIM17->CNT=0+brillado_led_rgb;
-			brillado_led_rgb=255;
-			GPIOA->BSRR=led_rgb.pin[estado_led];
 		}
 	}
 

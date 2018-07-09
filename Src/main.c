@@ -155,18 +155,6 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint8_t B_R=0,B_G=0,B_B=0;
-  F_LED_RGB(255,0,0);
-  Delay_ms(500);
-  F_LED_RGB(0,255,0);
-  Delay_ms(500);
-  F_LED_RGB(0,0,255);
-  Delay_ms(500);
-  for(uint8_t i=0; i<255;i++)
-  {
-	  F_LED_RGB(i,i,i);
-	  Delay_ms(10);
-  }
   for(uint8_t i=255; i>0;i--)
   {
 	  F_LED_RGB(i,i,i);
@@ -176,21 +164,29 @@ int main(void)
   Delay_ms(500);
   while (1)
   {
-	  Delay_ms(20);
-	  B_R=B_R+1;
-	  B_G=B_G+2;
-	  B_B=B_B+3;
-	  F_LED_RGB(B_R,B_G,B_B);
-//LL_GPIO_TogglePin(GPIOA,LL_GPIO_PIN_2);
-	  /*GPIOA->ODR ^= LL_GPIO_PIN_2;
-	  Delay_ms(500);
-	  GPIOA->ODR ^= LL_GPIO_PIN_2;
-	  GPIOA->ODR ^= LL_GPIO_PIN_3;
-	  Delay_ms(500);
-	  GPIOA->ODR ^= LL_GPIO_PIN_3;
-	  GPIOA->ODR ^= LL_GPIO_PIN_4;
-	  Delay_ms(500);
-	  GPIOA->ODR ^= LL_GPIO_PIN_4;*/
+	  uint8_t rgbColor[3];
+	  // Start off with red.
+	  rgbColor[0] = 255;
+	  rgbColor[1] = 0;
+	  rgbColor[2] = 0;
+
+	  for (int decColor = 0; decColor < 3; decColor++)
+	  {
+	      int incColor = decColor;
+	      if(incColor== 2) incColor=0;
+	      else incColor++;
+
+	      // cross-fade the two colours.
+	      for(uint8_t i = 0; i < 255; i += 1)
+	      {
+	        rgbColor[decColor]--;
+	        rgbColor[incColor]++;
+
+	        F_LED_RGB(rgbColor[0], rgbColor[1], rgbColor[2]);
+	        Delay_ms(5);
+	      }
+	  }
+
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */

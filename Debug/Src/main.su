@@ -2,9 +2,9 @@ core_cm4.h:1615:26:NVIC_GetPriorityGrouping	0	static
 stm32f3xx_ll_bus.h:303:22:LL_AHB1_GRP1_EnableClock	8	static
 stm32f3xx_ll_bus.h:553:22:LL_APB1_GRP1_EnableClock	8	static
 stm32f3xx_ll_bus.h:867:22:LL_APB2_GRP1_EnableClock	8	static
-main.c:817:13:Delay_ms	8	static
-main.c:839:13:F_LED_RGB	40	static
+main.c:813:13:Delay_ms	8	static
+main.c:835:13:F_LED_RGB	40	static
 core_cm4.h:1745:26:NVIC_EncodePriority.constprop	0	static
-main.c:234:6:SystemClock_Config	8	static
-main.c:112:5:main	168	static
-main.c:883:6:_Error_Handler	0	static
+main.c:230:6:SystemClock_Config	8	static
+main.c:112:5:main	160	static
+main.c:879:6:_Error_Handler	0	static
