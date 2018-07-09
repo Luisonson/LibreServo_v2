@@ -57,6 +57,10 @@ typedef enum
 #define LED_RED LL_GPIO_PIN_3
 #define LED_BLUE LL_GPIO_PIN_4
 
+#define DMA_RX_BUFF_SIZE            64
+
+uint8_t dma_tx_buff[DMA_RX_BUFF_SIZE];
+
 struct s_led_rgb {uint32_t pin[3];uint8_t brillo[3];};
 extern volatile struct s_led_rgb led_rgb;
 volatile struct s_led_rgb led_rgb = {			//The actual state
@@ -148,6 +152,22 @@ int main(void)
   /* USER CODE BEGIN 2 */
   LL_TIM_EnableCounter(TIM17);			//Timer17 starts running (TIM17->CR1.CEN)
   LL_TIM_EnableIT_UPDATE(TIM17);		//Enable the Update interrupt in TIM17 (TIM17->DIER.UIE ---> TIM17->SR.UIF)
+
+  //https://community.st.com/thread/47031-restart-dma-stm32f767
+  //LL_DMA_SetChannelSelection(DMA1, LL_DMA_STREAM_0, LL_DMA_CHANNEL_4);
+  //LL_DMA_SetDataTransferDirection(DMA1, LL_DMA_STREAM_0, LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
+  //LL_DMA_SetStreamPriorityLevel(DMA1, LL_DMA_STREAM_0, LL_DMA_PRIORITY_LOW);
+  LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MODE_CIRCULAR);
+  //LL_DMA_SetMode(DMA1, LL_DMA_CHANNEL_5, LL_DMA_MODE_NORMAL);
+  //LL_DMA_SetPeriphIncMode(DMA1, LL_DMA_STREAM_0, LL_DMA_PERIPH_NOINCREMENT);
+  //LL_DMA_SetMemoryIncMode(DMA1, LL_DMA_STREAM_0, LL_DMA_MEMORY_INCREMENT);
+  //LL_DMA_SetPeriphSize(DMA1, LL_DMA_STREAM_0, LL_DMA_PDATAALIGN_BYTE);
+  //LL_DMA_SetMemorySize(DMA1, LL_DMA_STREAM_0, LL_DMA_MDATAALIGN_BYTE);
+  //LL_DMA_DisableFifoMode(DMA1, LL_DMA_STREAM_0);??
+  LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_5, (uint32_t)dma_tx_buff);
+  LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, sizeof(dma_tx_buff));
+  LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_5, (uint32_t)&UART1->RDR);
+  //LL_DMA_EnableStream(DMA1, LL_DMA_STREAM_0);????
 
 
   /* USER CODE END 2 */
