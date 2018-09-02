@@ -1,1 +1,8 @@
 /Debug/
+.gitignore
+.gitattributes
+STM32F302K8_FLASH.ld
+.cproject.bak
+.project.bak
+STM32F302K8Ux_FLASH.ld
+/.settings/
