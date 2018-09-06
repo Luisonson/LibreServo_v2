@@ -856,10 +856,8 @@ static void F_LED_RGB(uint8_t Z_RED, uint8_t Z_GREEN, uint8_t Z_BLUE)
 		}
 	}
 
-	for(int a=1;a<3;a++)
-	{
-		led_rgb_temp.brillo[a]=led_rgb_temp.brillo[a]-(led_rgb_temp.brillo[0]);
-	}
+	led_rgb_temp.brillo[1]=led_rgb_temp.brillo[1]-led_rgb_temp.brillo[0];
+	led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]-led_rgb_temp.brillo[0];
 	led_rgb_temp.brillo[2]=led_rgb_temp.brillo[2]-led_rgb_temp.brillo[1];
 
 	/*for(int a=0;a<3;a++)
