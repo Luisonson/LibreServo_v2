@@ -1,4 +1,4 @@
-# <img src="http://www.libreservo.eu/sites/libreservo.eu/files/imagenes/LibreServo_logo_xs.png">
+# <img src="https://www.libreservo.eu/sites/libreservo.eu/files/imagenes/LibreServo_logo_xs.png">
 A servo controler open project.
 
 LibreServo ha nacido como necesidad propia de actualizar unos servomotores muy caros que tenía de hace años totalmente infrautilizados por tener una electrónica típica de los servomotores, básica y "tonta".
@@ -18,4 +18,4 @@ Con LibreServo, se pretenderá dotar de características típicas de "smart-serv
     Control del par motor mediante la lectura de la corriente.
     LED rgb (estamos en 2018, si algo no es rgb ya no vale para nada ;) ).
 
-Más información en <a href="http://www.libreservo.eu/">libreservo.eu</a>
+Más información en <a href="https://www.libreservo.eu/">libreservo.eu</a>
