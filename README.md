@@ -1,5 +1,5 @@
 # <img src="https://www.libreservo.eu/sites/libreservo.eu/files/imagenes/LibreServo_logo_xs.png">
-A servo controller open project.
+An Open source controller to convert any servo motor to the best smart servo.
 
 LibreServo ha nacido como necesidad propia de actualizar unos servomotores muy caros que tenía de hace años totalmente infrautilizados por tener una electrónica típica de los servomotores, básica y "tonta".
 Con LibreServo, se pretenderá dotar de características típicas de "smart-servos" de más de 100 euros a cualquier servo de tamaños estándar.
