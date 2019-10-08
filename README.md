@@ -1,4 +1,4 @@
-# <img src="https://www.libreservo.eu/sites/libreservo.eu/files/imagenes/LibreServo_logo_xs.png">
+# <img src="https://www.libreservo.com/sites/libreservo.com/files/imagenes/LibreServo_logo_xs.png">
 An Open source controller to convert any servo motor to the best smart servo.
 
 LibreServo ha nacido como necesidad propia de actualizar unos servomotores muy caros que tenía de hace años totalmente infrautilizados por tener una electrónica típica de los servomotores, básica y "tonta".
