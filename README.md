@@ -18,4 +18,4 @@ Con LibreServo, se pretenderá dotar de características típicas de "smart-serv
     Control del par motor mediante la lectura de la corriente.
     LED rgb (estamos en 2018, si algo no es rgb ya no vale para nada ;) ).
 
-Más información en <a href="https://www.libreservo.com/">libreservo.com</a>
+Más información en <a href="https://www.libreservo.com/">LibreServo</a>.
