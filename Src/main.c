@@ -54,61 +54,24 @@ volatile uint32_t data_SSI_IN_old = 0;
 volatile long data_SSI_IN_internal = 0;
 volatile long data_SSI_IN_vuelta = 0;
 
-
-////float grados_encoder = 0;
-/*volatile float grados_encoder_kalman = 0.0;
-volatile float grados_encoder_kalman_antes = 0.0;
-volatile float velocidad_antes = 0.0;*/
-
 uint32_t tiempo_ms = 0;
 
 extern volatile uint32_t ticks;					//Inicializado en funciones.c
 
-/*extern volatile float k_corriente;				//Inicializado en funciones.c
-extern float k_temp_ext;						//Inicializado en funciones.c
-extern float k_temp_int;						//Inicializado en funciones.c
-extern float k_volts;							//Inicializado en funciones.c
-extern volatile float k_encoder;				//Inicializado en funciones.c*/
 /********************************************************************************************************/
 uint16_t version_LS = 6;
 /********************************************************************************************************/
+
 volatile uint16_t ID_SERVO;
 
-/*extern uint16_t q_corriente, q_temp_ext, q_temp_int, q_volts, q_encoder;
-extern uint16_t varianza_corriente, varianza_temp_ext, varianza_temp_int, varianza_volts, varianza_encoder;*/
 uint32_t vel_serie;
-////uint16_t corte_temp_ext, corte_temp_int, corte_volts_alto, corte_volts_bajo, corte_corriente;
 
 extern volatile uint8_t bat_estado;						//Inicializado en LS_funciones.c Estado batería 0=Good, 1=LOW, 2=HIGH
 extern volatile uint8_t temp_estado;					//Inicializado en LS_funciones.c Estado temperature 0=Good, 1=HIGH_external, 2=HIGH_internal, 3=HIGH_BOTH
 
-/*volatile uint16_t uso_crc; 			//0=False, 1=True, 2=Both
-volatile uint16_t CRC_START_CCITT;
-
-extern volatile uint16_t K_P_LS, K_D_LS, K_I_LS;		//Inicializado en LS_PID.c
-extern volatile uint16_t K_P_M, K_D_M, K_I_M;			//Inicializado en LS_PID.c*/
-
-//volatile int offset_corriente;
-
-////volatile uint16_t envio_si_leo;			//No enviar si se reciben datos (0=False, 1=True, 2=True envío actual)
-/*boolean LED_modo_RAINBOW = FALSE;
-uint8_t rgbColor[3] = {255,0,0}; //Empieza con Rojo el arcoíris
-uint8_t decColor = 0;
-uint8_t incColor = 1;
-uint8_t brillo_led = 0;*/
-
 volatile boolean status_tone = FALSE;
 extern volatile uint8_t saludo_inicial;		//inicializado en LS_flash.h Saludo Inicial (0=False, 1=True)
 
-/*uint16_t version_LS = 4;
-volatile uint16_t ID_SERVO = 1;
-
-uint16_t q_corriente, q_temp_ext, q_temp_int, q_volts, q_encoder;
-uint16_t varianza_corriente, varianza_temp_ext, varianza_temp_int, varianza_volts, varianza_encoder;
-uint32_t vel_serie;
-uint16_t corte_temp_ext, corte_temp_int, corte_volts_alto, corte_volts_bajo, corte_corriente;*/
-
-/* Values of Variable1, Variable2 and Variable3 */
 uint16_t VarValue1/*, VarValue2, VarValue3*/;
 
 /* Virtual address defined by the user: 0xFFFF value is prohibited */
@@ -116,28 +79,6 @@ uint16_t VirtAddVarTab[NB_OF_VAR] = {0x0001, 0x0002, 0x0003};
 uint16_t VarDataTab[NB_OF_VAR] = {0, 0, 0};
 
 boolean error_read_init_flash = FALSE;
-
-/*struct LS_temp_task_scheduler {uint8_t comando[LS_TASK_SCHEDULER_SIZE];long param_1[LS_TASK_SCHEDULER_SIZE];long param_2[LS_TASK_SCHEDULER_SIZE];long param_3[LS_TASK_SCHEDULER_SIZE];long param_4[LS_TASK_SCHEDULER_SIZE];long param_5[LS_TASK_SCHEDULER_SIZE];long time_comando[LS_TASK_SCHEDULER_SIZE];boolean prioritaria[LS_TASK_SCHEDULER_SIZE];};
-volatile struct LS_temp_task_scheduler temp_task_scheduler = {{0},{0},{0},{0},{0},{0},{0},{0}};
-
-struct LS_task_scheduler {uint8_t comando[LS_TASK_SCHEDULER_SIZE];long param_1[LS_TASK_SCHEDULER_SIZE];long param_2[LS_TASK_SCHEDULER_SIZE];long param_3[LS_TASK_SCHEDULER_SIZE];long param_4[LS_TASK_SCHEDULER_SIZE];long param_5[LS_TASK_SCHEDULER_SIZE];long time_comando[LS_TASK_SCHEDULER_SIZE];uint8_t iniciado[LS_TASK_SCHEDULER_SIZE];};
-//extern volatile struct LS_task_scheduler task_scheduler;
-volatile struct LS_task_scheduler task_scheduler = {{0},{0},{0},{0},{0},{0},{0},{0}};
-volatile uint8_t LS_TS_ESTADO = 0, LS_TEMP_TS_GUARDADO = 0, LS_TS_GUARDADO = 0;
-struct LS_comando_motor {uint8_t comando; long pos_now; float velocidad; float aceleracion; long pos_destino; float pos_destino_f; long pos_ini; long pos_final; long time_to_end; float step; long time_ramp1; long time_ramp2; float step_ramp1; float step_ramp2;};
-volatile struct LS_comando_motor comando_motor = {0,0,0.0,0.0,0,0.0,0,0,0,0.0,0,0,0.0,0.0};
-
-volatile uint16_t crc_tabccitt[256];*/
-/*volatile uint16_t uso_crc = 2; 			//0=False, 1=True, 2=Both
-volatile uint16_t CRC_START_CCITT;
-volatile uint16_t CRC_POLY_CCITT;*/
-
-//struct LS_comando_motor {uint8_t comando; long pos_now; float velocidad; float aceleracion; long pos_destino; float pos_destino_f; long pos_ini; long pos_final; long time_to_end; float step; long time_ramp1; long time_ramp2; float step_ramp1; float step_ramp2;};
-//extern volatile struct LS_comando_motor comando_motor;			//Inicializado en LS_Funciones.c
-
-////extern volatile uint16_t CRC_POLY_CCITT;
-
-//volatile uint16_t envio_si_leo = 1;
 
 
 /*********************************************************
@@ -167,37 +108,7 @@ volatile uint16_t CRC_POLY_CCITT;*/
  * [23] -> PWM
  * [24] -> output_LS
  *********************************************************/
-////long buff_sensores[TAM_BUFF_SENSORES] = { 0 };
-////volatile uint8_t orden_sensores[TAM_BUFF_SENSORES] = { 0 };
-//volatile uint8_t temp_orden_sensores[TAM_BUFF_SENSORES] = {};
-//uint8_t orden_sensores_print[TAM_BUFF_SENSORES];
-/*struct LS_temp_comandos_serial {uint8_t orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]; long times[LS_TASK_SERIAL_SIZE]; long time[LS_TASK_SERIAL_SIZE]; boolean prioritaria[LS_TASK_SERIAL_SIZE];};
-volatile struct LS_temp_comandos_serial temp_comandos_serial = {{},{0},{0},{0}};
-struct LS_comandos_serial {uint8_t orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]; long times[LS_TASK_SERIAL_SIZE]; long time[LS_TASK_SERIAL_SIZE];uint8_t iniciado[LS_TASK_SERIAL_SIZE];};
-volatile struct LS_comandos_serial comandos_serial = {{},{0},{0},{5}};
-volatile uint8_t LS_TS_ESTADO_SERIAL = 0, LS_TEMP_TS_GUARDADO_SERIAL = 0, LS_TS_GUARDADO_SERIAL = 0;*/
-////struct LS_comandos_serial {uint8_t orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]; long times[LS_TASK_SERIAL_SIZE]; long time[LS_TASK_SERIAL_SIZE];uint8_t iniciado[LS_TASK_SERIAL_SIZE];boolean cabecera[LS_TASK_SERIAL_SIZE];};
-////extern volatile struct LS_comandos_serial comandos_serial;			//Inicializado en LS_funciones.c
-////extern volatile uint8_t LS_TS_ESTADO_SERIAL, LS_TS_GUARDADO_SERIAL;	//Inicializado en LS_funciones.c
 
-
-/*volatile boolean send_RS485 = FALSE;
-uint32_t sum_enviados = 0;
-uint32_t serial_sum_a_enviar = 0;
-uint8_t LS_ESTADO_RS485 = 0;
-volatile uint8_t serial_RS485_datos_enviar = 0;*/
-
-//volatile uint16_t K_P_LS, K_D_LS, K_I_LS;
-//volatile float K_P_LS_f, K_D_LS_f, K_I_LS_f;
-//volatile float ITerm_LS = 0.0;
-//volatile uint16_t K_P_M, K_D_M, K_I_M;
-//volatile float K_P_M_f, K_D_M_f, K_I_M_f;
-//volatile float ITerm_M = 0.0;
-//long pos_bef_PID_LS,pos_bef_PID_M;
-
-//uint16_t t_ramp_t = 200, t_ramp_s = 200, a_ramp_t = 500;
-
-////extern volatile int pos_buff_rx = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
