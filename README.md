@@ -1,21 +1,20 @@
 # <img src="https://www.libreservo.com/sites/libreservo.com/files/imagenes/LibreServo_logo_xs.png">
 An Open source controller to convert any servo motor to the best smart servo.
 
-LibreServo ha nacido como necesidad propia de actualizar unos servomotores muy caros que tenía de hace años totalmente infrautilizados por tener una electrónica típica de los servomotores, básica y "tonta".
-Con LibreServo, se pretenderá dotar de características típicas de "smart-servos" de más de 100 euros a cualquier servo de tamaños estándar.
+This project was born as a necessity of mine to build a biped robot with intelligent servos to be able to “feel the muscles” to walk more human like. In the past we had OpenServo, and I think this project inherits something from it, but OpenServo died many years ago and it didn't reach my expectations anyway (power, communications...), and the commercial alternatives are way too expensive (Dynamixel, Herkulex, Lynxmotion...).
 
-    El servomotor podrá girar 360 grados.
-    Se podrán encadenar los servomotores. No hará falta conectar todos los servomotores a la placa controladora.
-    La resolución del servomotor será de 12bits como poco (4096 pasos).
-    El rango de voltaje irá de tan sólo 4,5V hasta los 18V.
-    La comunicación del servomotor podrá seguir siendo PWM para mantener la compatibilidad, pero para obtener todas las características, sería serie de hasta 9Mbps full duplex (configurable a diferentes velocidades) intentando en todo momento que no se necesite ningún tipo de hardware externo, siendo posible controlarlos directamente desde el pc (con un adaptador USB-Serie), con una arduino a 5V o con cualquier controlador a 3,3V.
-    El propio servomotor será el encargado de generar las curvas de movimiento (por ejemplo senoidales o las potentes curvas hermíticas [dado punto inicial y final, así como las pendientes en dichos puntos, calcula la curva]).
-    Capacidad de encadenar comandos de movimiento que el servo guardará e irá siguiendo de manera encadenada.
-    Capacidad de leer la tensión, corriente consumida (instantánea, total y la media), posición y temperatura del servomotor.
-    Capacidad de generar un log de posición, voltaje, corriente y/o temperatura para ser analizado a posteriori.
-    Capacidad de poder alterar las constantes de control del servomotor.
-    Capacidad de mandar el mismo comando a varios servomotores a la vez, a todos ellos o a rangos de ellos sin tener que enviar varias veces el comando, sólo una.
-    Control del par motor mediante la lectura de la corriente.
-    LED rgb (estamos en 2018, si algo no es rgb ya no vale para nada ;) ).
+My goal with LibreServo is to make any standard servo the “smartest” one in the market. The "gold standard" nowadays is Robotis-Dynamixel, LibreServo should be better than that, that’s my goal at least.
 
-Más información en <a href="https://www.libreservo.com/">LibreServo</a>.
+A few characteristics of LibreServo:
+
+    Compatible with standard servo motors (No need to change the bottom cover of them!)
+    Voltage: From 4.5V up to 18V (Recommended: 5-13V)
+    Communications: RS-485 half-duplex. Max Speed 9Mbps. Daisy chained. CRC-16
+    Amp: Up to 7A continuous (FDS8858CZ || VBA5311)
+    Micro-Controller: STM32F301k8 (cortex-M4@72MHz)
+    Position sensor: Magnetic encoder, 16 bits of resolution! 360 degrees (AEAT-8800). Using the servo motor potentiometer will be possible to lower the cost but will lost precision and some characteristics.
+    For the encoder I have designed 3D parts to substitute the potentiometer and used the same hole/space than the original.
+    LibreServo will generate their own curves (sine ramps, trapezoidal ramps, hermitian curves...)
+    Current sensor: +-15A ACS711
+
+More info in <a href="https://www.libreservo.com/">LibreServo</a>.
