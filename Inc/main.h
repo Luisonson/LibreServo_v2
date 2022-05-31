@@ -1,45 +1,29 @@
+/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.h
   * @brief          : Header for main.c file.
   *                   This file contains the common defines of the application.
+  * @author			: Luis Picó Chausson
+  * @version		: 0.1
+  * Created on: 24 jun. 2018
   ******************************************************************************
-  ** This notice applies to any and all portions of this file
-  * that are not between comment pairs USER CODE BEGIN and
-  * USER CODE END. Other portions of this file, whether 
-  * inserted by the user or by software development tools
-  * are owned by their respective copyright owners.
+  * @attention
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
-  *
-  * Redistribution and use in source and binary forms, with or without modification,
-  * are permitted provided that the following conditions are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright notice,
-  *      this list of conditions and the following disclaimer in the documentation
-  *      and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its contributors
-  *      may be used to endorse or promote products derived from this software
-  *      without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-  * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-  * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  * LibreServo by Luis Picó is licensed under a Creative Commons 
+  * Attribution-NonCommercial-ShareAlike 4.0 International License
   *
   ******************************************************************************
   */
+/* USER CODE END Header */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __MAIN_H
+#define __MAIN_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f3xx_ll_adc.h"
@@ -53,15 +37,67 @@
 #include "stm32f3xx_ll_pwr.h"
 #include "stm32f3xx_ll_tim.h"
 #include "stm32f3xx_ll_usart.h"
-#include "stm32f3xx.h"
 #include "stm32f3xx_ll_gpio.h"
 
-/* USER CODE BEGIN Includes */
+#if defined(USE_FULL_ASSERT)
+#include "stm32_assert.h"
+#endif /* USE_FULL_ASSERT */
 
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
+#include "LS_boolean.h"
+#include "math.h"
+#include "string.h"
+#include "stm32f30x_flash.h"
+#include "eeprom.h"
+#include "LS_flash.h"
+#include "LS_PID.h"
+#include "LS_curvas_motor.h"
+#include "LS_funciones.h"
 /* USER CODE END Includes */
 
-/* Private define ------------------------------------------------------------*/
+/* Exported types ------------------------------------------------------------*/
+/* USER CODE BEGIN ET */
 
+/* USER CODE END ET */
+
+/* Exported constants --------------------------------------------------------*/
+/* USER CODE BEGIN EC */
+#define DMA_RX_BUFF_SIZE            12
+#define SERIAL_BUFF_SIZE            100
+#define DMA_TX_BUFF_SIZE            300
+
+#define LS_TASK_SCHEDULER_SIZE		100
+#define LS_TASK_SERIAL_SIZE			15
+#define TAM_BUFF_SENSORES			25
+#define TAM_DMA_ADC1_BUFF			32
+//#define DEFAULT_TIMES				10000
+//#define DEFAULT_TIME				20
+
+#define degree_to_radian			0.0174533f
+
+#define LED_GREEN LL_GPIO_PIN_4
+#define LED_RED LL_GPIO_PIN_5
+#define LED_BLUE LL_GPIO_PIN_3
+
+#define LONG_MIN					-2147483647L // -(2^31 - 1)
+#define NUM_VARIABLES				64
+
+/* USER CODE END EC */
+
+/* Exported macro ------------------------------------------------------------*/
+/* USER CODE BEGIN EM */
+
+/* USER CODE END EM */
+
+/* Exported functions prototypes ---------------------------------------------*/
+void Error_Handler(void);
+
+/* USER CODE BEGIN EFP */
+
+/* USER CODE END EFP */
+
+/* Private defines -----------------------------------------------------------*/
 #ifndef NVIC_PRIORITYGROUP_0
 #define NVIC_PRIORITYGROUP_0         ((uint32_t)0x00000007) /*!< 0 bit  for pre-emption priority,
                                                                  4 bits for subpriority */
@@ -74,28 +110,12 @@
 #define NVIC_PRIORITYGROUP_4         ((uint32_t)0x00000003) /*!< 4 bits for pre-emption priority,
                                                                  0 bit  for subpriority */
 #endif
-
-/* ########################## Assert Selection ############################## */
-/**
-  * @brief Uncomment the line below to expanse the "assert_param" macro in the 
-  *        HAL drivers code
-  */
-/* #define USE_FULL_ASSERT    1U */
-
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
- extern "C" {
-#endif
-void _Error_Handler(char *, int);
-
-#define Error_Handler() _Error_Handler(__FILE__, __LINE__)
-#ifdef __cplusplus
 }
 #endif
 
-#endif /* __MAIN_H__ */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+#endif /* __MAIN_H */
