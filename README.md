@@ -19,4 +19,4 @@ A few characteristics of LibreServo:
 
 More info in <a href="https://www.libreservo.com/">LibreServo</a>.
 
-<a href="[https://www.libreservo.com/](http://creativecommons.org/licenses/by-nc-sa/4.0/)">![Cc-by-nc-sa_icon](https://user-images.githubusercontent.com/12425566/173029539-b97b4415-21ae-4de6-a23c-4ae92b80e803.png)</a>
+<a href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img align="center" width="240" height="84" src="https://user-images.githubusercontent.com/12425566/173029539-b97b4415-21ae-4de6-a23c-4ae92b80e803.png" alt="cc-by-nc-sa"></a>
