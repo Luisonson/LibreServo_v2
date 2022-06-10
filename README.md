@@ -18,3 +18,5 @@ A few characteristics of LibreServo:
     Current sensor: +-15A ACS711
 
 More info in <a href="https://www.libreservo.com/">LibreServo</a>.
+
+<a href="[https://www.libreservo.com/](http://creativecommons.org/licenses/by-nc-sa/4.0/)">![Cc-by-nc-sa_icon](https://user-images.githubusercontent.com/12425566/173029539-b97b4415-21ae-4de6-a23c-4ae92b80e803.png)</a>
