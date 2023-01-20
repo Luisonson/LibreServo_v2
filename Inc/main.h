@@ -69,7 +69,7 @@ extern "C" {
 
 #define LS_TASK_SCHEDULER_SIZE		100
 #define LS_TASK_SERIAL_SIZE			15
-#define TAM_BUFF_SENSORES			25
+#define TAM_BUFF_SENSORES			26
 #define TAM_DMA_ADC1_BUFF			32
 //#define DEFAULT_TIMES				10000
 //#define DEFAULT_TIME				20
