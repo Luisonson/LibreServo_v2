@@ -59,18 +59,28 @@ void comando_M()
 		task_scheduler.iniciado[LS_TS_ESTADO] = 1;
 		comando_motor.pos_final = task_scheduler.param_1[LS_TS_ESTADO];
 		f_temp1 = comando_motor.pos_final - f_now;
-		if(task_scheduler.param_2[LS_TS_ESTADO] > 0) comando_motor.time_to_end = task_scheduler.param_2[LS_TS_ESTADO];
-		else comando_motor.time_to_end = 1;
-		comando_motor.step = f_temp1 / (float)comando_motor.time_to_end;
-		comando_motor.time_to_end = comando_motor.time_to_end - 1;
-		comando_motor.pos_destino_f = f_now + comando_motor.step;
-		if (comando_motor.pos_destino_f >= 0) comando_motor.pos_destino = comando_motor.pos_destino_f + 0.5f;
-		else comando_motor.pos_destino = comando_motor.pos_destino_f - 0.5f;
+		if(task_scheduler.param_2[LS_TS_ESTADO] > 1)
+		{	
+			comando_motor.time_to_end = task_scheduler.param_2[LS_TS_ESTADO];
+			comando_motor.step = f_temp1 / (float)comando_motor.time_to_end;
+			comando_motor.time_to_end = comando_motor.time_to_end - 1;
+			comando_motor.pos_destino_f = f_now + comando_motor.step;
+			if (comando_motor.pos_destino_f >= 0) comando_motor.pos_destino = comando_motor.pos_destino_f + 0.5f;
+			else comando_motor.pos_destino = comando_motor.pos_destino_f - 0.5f;
+		}
+		else 
+		{	
+			comando_motor.time_to_end = 0;
+			comando_motor.pos_destino_f = comando_motor.pos_final;
+			comando_motor.pos_destino = comando_motor.pos_final;
+			task_scheduler.iniciado[LS_TS_ESTADO] = 2;
+		}
+		
 	}
 	else if (task_scheduler.iniciado[LS_TS_ESTADO] == 1)
 	{
 		comando_motor.time_to_end = comando_motor.time_to_end - 1;
-		if (comando_motor.time_to_end != 0)
+		if (comando_motor.time_to_end > 0)
 		{
 			comando_motor.pos_destino_f = comando_motor.pos_destino_f + comando_motor.step;
 			if (comando_motor.pos_destino_f >= 0) comando_motor.pos_destino = comando_motor.pos_destino_f + 0.5f;
@@ -752,10 +762,18 @@ void comando_MP()
 	
 	if (task_scheduler.iniciado[LS_TS_ESTADO] == 0) task_scheduler.iniciado[LS_TS_ESTADO] = 1;
 	
-	if (task_scheduler.param_2[LS_TS_ESTADO] > 0) task_scheduler.param_2[LS_TS_ESTADO]--;
-	else task_scheduler.param_2[LS_TS_ESTADO] = 0;
-	
-	if (task_scheduler.param_2[LS_TS_ESTADO] == 0) task_scheduler.iniciado[LS_TS_ESTADO] = 2;
+	if (task_scheduler.param_2[LS_TS_ESTADO] == LONG_MIN) task_scheduler.iniciado[LS_TS_ESTADO] = 2;
+	else
+	{
+		if (task_scheduler.param_2[LS_TS_ESTADO] > 0) task_scheduler.param_2[LS_TS_ESTADO]--;
+		else task_scheduler.param_2[LS_TS_ESTADO] = 0;
+
+		if (task_scheduler.param_2[LS_TS_ESTADO] == 0)
+		{
+			task_scheduler.iniciado[LS_TS_ESTADO] = 2;
+			comando_motor.output_LS = 0;
+		}
+	}
 }
 void comando_MW()
 {

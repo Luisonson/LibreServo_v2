@@ -50,16 +50,18 @@ volatile uint16_t dma_adc1_buff[TAM_DMA_ADC1_BUFF] = { 0 };
 
 extern volatile uint8_t enviado_USART1;					//Inicializado en LS_funciones.c
 
-volatile uint32_t data_SSI_IN_old = 0;
+volatile uint32_t data_SSI_IN_old = 20000;
 volatile long data_SSI_IN_internal = 0;
 volatile long data_SSI_IN_vuelta = 0;
+
+//volatile int correccion_enc[257] = { };
 
 uint32_t tiempo_ms = 0;
 
 extern volatile uint32_t ticks;					//Inicializado en funciones.c
 
 /********************************************************************************************************/
-uint16_t version_LS = 6;
+uint16_t version_LS = 8;
 /********************************************************************************************************/
 
 volatile uint16_t ID_SERVO;
@@ -70,7 +72,8 @@ extern volatile uint8_t bat_estado;						//Inicializado en LS_funciones.c Estado
 extern volatile uint8_t temp_estado;					//Inicializado en LS_funciones.c Estado temperature 0=Good, 1=HIGH_external, 2=HIGH_internal, 3=HIGH_BOTH
 
 volatile boolean status_tone = FALSE;
-extern volatile uint8_t saludo_inicial;		//inicializado en LS_flash.h Saludo Inicial (0=False, 1=True)
+extern volatile uint8_t saludo_inicial;					//inicializado en LS_flash.h Saludo Inicial (0=False, 1=True)
+volatile boolean estado_FD = FALSE;
 
 uint16_t VarValue1/*, VarValue2, VarValue3*/;
 
@@ -121,6 +124,7 @@ static void MX_USART1_UART_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_TIM15_Init(void);
 static void MX_TIM16_Init(void);
+static void MX_TIM2_Init(void);
 static void MX_NVIC_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -163,7 +167,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  SysTick_Config(72000);			//Para que interrumpa cada milisegundo (ms). ticks++ . Configura SysTick como la interrupción de prioriordad MÁS BAJA
+  SysTick_Config(72000);			//Para que interrumpa cada milisegundo (ms). ticks++ . Configura SysTick como la interrupción de prioriordad M�?S BAJA
   MX_GPIO_Init();					//Se inicializa unas pocas líneas abajo de nuevo... no pasa nada
   init_USART1_rx_as_INPUT();
 
@@ -239,6 +243,7 @@ int main(void)
   MX_TIM17_Init();
   MX_TIM15_Init();
   MX_TIM16_Init();
+  MX_TIM2_Init();
 
   /* Initialize interrupts */
   MX_NVIC_Init();
@@ -250,8 +255,10 @@ int main(void)
   LL_TIM_EnableIT_UPDATE(TIM17);		//Enable the Update interrupt in TIM17 (TIM17->DIER.UIE ---> TIM17->SR.UIF)
   LL_TIM_EnableCounter(TIM16);			//Timer16 starts running (TIM16->CR1.CEN)
   LL_TIM_EnableIT_UPDATE(TIM16);		//Enable the Update interrupt in TIM16 (TIM16->DIER.UIE ---> TIM16->SR.UIF)
-  LL_TIM_EnableCounter(TIM15);			//Timer16 starts running (TIM15->CR1.CEN)
+  LL_TIM_EnableCounter(TIM15);			//Timer15 starts running (TIM15->CR1.CEN)
   LL_TIM_EnableIT_UPDATE(TIM15);		//Enable the Update interrupt in TIM15 (TIM15->DIER.UIE ---> TIM15->SR.UIF)
+  LL_TIM_EnableCounter(TIM2);			//Timer2 starts running (TIM2->CR1.CEN)
+  LL_TIM_EnableIT_UPDATE(TIM2);			//Enable the Update interrupt in TIM2 (TIM2->DIER.UIE ---> TIM2->SR.UIF)
 
   SET_PIN(GPIOA,LL_GPIO_PIN_10);  		//Habilitar el fan3227
   Delay_ms(20);
@@ -277,19 +284,19 @@ int main(void)
   if(saludo_inicial)
   {
 	  F_LED_RGB(255,0,0);
-	  tone(2093, 50, 1000);				//2093Hz(DO6, 50ms, 1000 de amplitud)
-	  F_LED_RGB(0,0,0);
+	  tone(2093, 5, 700);				//2093Hz(DO6, 50ms, 1000 de amplitud)
 	  tiempo_ms=ticks;
-	  while( ticks - tiempo_ms < 20 ){/*Espera 20ms*/}
+	  while( ticks - tiempo_ms < 50 ){/*Espera 30ms*/}
 	  F_LED_RGB(0,255,0);
-	  tone(3136, 50, 1000);				//3136Hz(SOL6, 50ms, 1000 de amplitud)
-	  F_LED_RGB(0,0,0);
+	  tone(3136, 5, 700);				//3136Hz(SOL6, 50ms, 1000 de amplitud)
 	  tiempo_ms=ticks;
-	  while( ticks - tiempo_ms < 20 ){/*Espera 20ms*/}
+	  while( ticks - tiempo_ms < 50 ){/*Espera 30ms*/}
 	  F_LED_RGB(0,0,255);
-	  tone(2637, 50, 1000);				//2637Hz(MI6, 50ms, 1000 de amplitud)
+	  tone(2637, 5, 700);				//2637Hz(MI6, 50ms, 1000 de amplitud)
+	  tiempo_ms=ticks;
+	  while( ticks - tiempo_ms < 50 ){/*Espera 30ms*/}
 	  F_LED_RGB(255,255,255);
-	  tone(4186, 100, 1800);			//4186Hz(DO7, 100ms, 1800 de amplitud [máxima amplitud])
+	  tone(4186, 15, 700);			//4186Hz(DO7, 100ms, 1800 de amplitud [máxima amplitud])
 	  F_LED_RGB(0,0,0);
   }
 
@@ -375,6 +382,16 @@ int main(void)
 		  F_LED_RGB(0,0,0);
 		  tiempo_ms = ticks;
 		  while( (ticks - tiempo_ms) < 1000 ){/*Espera 1000ms*/}
+	  }
+
+	  if(estado_FD == TRUE)
+	  {
+		  if(bat_estado == 0)
+		  {
+			  comando_FD();
+			  estado_FD = FALSE;
+		  }
+		  else estado_FD = FALSE;
 	  }
     /* USER CODE END WHILE */
 
@@ -634,7 +651,7 @@ static void MX_TIM1_Init(void)
   TIM_OC_InitStruct.OCMode = LL_TIM_OCMODE_PWM2;
   TIM_OC_InitStruct.OCState = LL_TIM_OCSTATE_DISABLE;
   TIM_OC_InitStruct.OCNState = LL_TIM_OCSTATE_DISABLE;
-  TIM_OC_InitStruct.CompareValue = 900;
+  TIM_OC_InitStruct.CompareValue = 0;
   TIM_OC_InitStruct.OCPolarity = LL_TIM_OCPOLARITY_LOW;
   TIM_OC_InitStruct.OCNPolarity = LL_TIM_OCPOLARITY_HIGH;
   TIM_OC_InitStruct.OCIdleState = LL_TIM_OCIDLESTATE_HIGH;
@@ -642,7 +659,6 @@ static void MX_TIM1_Init(void)
   LL_TIM_OC_Init(TIM1, LL_TIM_CHANNEL_CH1, &TIM_OC_InitStruct);
   LL_TIM_OC_DisableFast(TIM1, LL_TIM_CHANNEL_CH1);
   LL_TIM_OC_EnablePreload(TIM1, LL_TIM_CHANNEL_CH2);
-  TIM_OC_InitStruct.CompareValue = 0;
   TIM_OC_InitStruct.OCIdleState = LL_TIM_OCIDLESTATE_LOW;
   LL_TIM_OC_Init(TIM1, LL_TIM_CHANNEL_CH2, &TIM_OC_InitStruct);
   LL_TIM_OC_DisableFast(TIM1, LL_TIM_CHANNEL_CH2);
@@ -678,6 +694,45 @@ static void MX_TIM1_Init(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   GPIO_InitStruct.Alternate = LL_GPIO_AF_6;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+}
+
+/**
+  * @brief TIM2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM2_Init(void)
+{
+
+  /* USER CODE BEGIN TIM2_Init 0 */
+
+  /* USER CODE END TIM2_Init 0 */
+
+  LL_TIM_InitTypeDef TIM_InitStruct = {0};
+
+  /* Peripheral clock enable */
+  LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+
+  /* TIM2 interrupt Init */
+  NVIC_SetPriority(TIM2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(TIM2_IRQn);
+
+  /* USER CODE BEGIN TIM2_Init 1 */
+
+  /* USER CODE END TIM2_Init 1 */
+  TIM_InitStruct.Prescaler = 1;
+  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+  TIM_InitStruct.Autoreload = 2250;
+  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+  LL_TIM_Init(TIM2, &TIM_InitStruct);
+  LL_TIM_EnableARRPreload(TIM2);
+  LL_TIM_SetClockSource(TIM2, LL_TIM_CLOCKSOURCE_INTERNAL);
+  LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_RESET);
+  LL_TIM_DisableMasterSlaveMode(TIM2);
+  /* USER CODE BEGIN TIM2_Init 2 */
+
+  /* USER CODE END TIM2_Init 2 */
 
 }
 

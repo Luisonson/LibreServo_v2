@@ -52,6 +52,9 @@ volatile uint8_t saludo_inicial = TRUE;			//Saludo Inicial (0=False, 1=True)
 volatile long min_posicion, max_posicion;		//Min y máx posición (0-4294967294 -> -2147483647 - 2147483647)
 volatile uint8_t limit_posicion;				//limites posición (0=False, 1=True)
 volatile uint16_t deadband;
+volatile uint8_t direccion_motor;				//Dirección motor (0/1)
+
+extern volatile int correccion_enc[257];		//Inicializado en main.c
 
 uint16_t write_32_flash(uint16_t VirtAddress,uint32_t variable)
 {
@@ -77,7 +80,7 @@ uint16_t read_32_flash(uint16_t VirtAddress,uint32_t* variable)
 }
 uint16_t write_init_flash()
 {
-	uint16_t resultado;
+	uint16_t resultado, i_correccion, d_correccion;
 
 	resultado = EE_WriteVariable(0x0002,1);		//ID_SERVO
 
@@ -129,10 +132,27 @@ uint16_t write_init_flash()
 
 	resultado += EE_WriteVariable(0x002A,5);			//deadband 5
 
+	resultado += EE_WriteVariable(0x002B,0);			//direccion_motor 0
+	
+	for(d_correccion=0x1000,i_correccion=0;i_correccion<256;d_correccion++,i_correccion++)
+	{
+		resultado += EE_WriteVariable(d_correccion,0);
+	}
+
 	return(resultado);
 }
 void reset_flash()
 {
+	FLASH_ErasePage(PAGE0_BASE_ADDRESS);
+	FLASH_ProgramHalfWord(PAGE0_BASE_ADDRESS, VALID_PAGE);
+	FLASH_ErasePage(PAGE1_BASE_ADDRESS);
+	EE_WriteVariable(0x0001,version_LS);
+	/*Escribir todas las variables*/
+	write_init_flash();
+	read_init_flash();
+	init_crcccitt_tab();			//Inicializa la tabla de CRC. Por defecto CRC-16/AUG-CCITT
+	get_kalman_gains();
+	/*uint16_t i_correccion, d_correccion;
 	read_init_flash();
 
 	if (ID_SERVO != 1) EE_WriteVariable(0x0002,1);					//ID_SERVO
@@ -186,7 +206,14 @@ void reset_flash()
 
 	if(deadband != 5) EE_WriteVariable(0x002A,5);					//deadband 5
 
-	read_init_flash();
+	if(direccion_motor != 0) EE_WriteVariable(0x002B,0);			//direccion_motor 0
+	
+	for(d_correccion=0x1000,i_correccion=0;i_correccion<256;d_correccion++,i_correccion++)
+	{
+		if(correccion_enc[i_correccion] != 0) EE_WriteVariable(d_correccion,0);
+	}
+
+	read_init_flash();*/
 }
 void reset_value_flash()
 {
@@ -216,7 +243,7 @@ void reset_value_flash()
 			break;
 			case 105:
 				EE_WriteVariable(0x0007,1200);				//Incertidumbre proceso encoder (x1000)
-				q_encoder = 1000;
+				q_encoder = 1200;
 			break;
 			case 106:
 				EE_WriteVariable(0x0008,1000);				//Varianza corriente (x1000)
@@ -327,7 +354,7 @@ void reset_value_flash()
 				min_posicion = 0;
 			break;
 			case 133:
-				EE_WriteVariable(0x0026,1);					//limites posición (0=False, 1=True)
+				EE_WriteVariable(0x0026,0);					//limites posición (0=False, 1=True)
 				limit_posicion = 0;
 			break;
 			case 134:
@@ -346,9 +373,17 @@ void reset_value_flash()
 				EE_WriteVariable(0x002A,5);					//deadband 5
 				deadband = 5;
 			break;
+			case 138:
+				EE_WriteVariable(0x002B,0);					//direccion_motor 0
+				direccion_motor = 0;
 			default:
 			break;
 		}
+		/*if(task_scheduler.param_1[LS_TS_ESTADO]>=0x1000 && task_scheduler.param_1[LS_TS_ESTADO]<=0x1100)
+		{
+			EE_WriteVariable(task_scheduler.param_1[LS_TS_ESTADO],0);
+			correccion_enc[task_scheduler.param_1[LS_TS_ESTADO]-0x1000] = 0;
+		}*/
 		//read_init_value_flash();
 	}
 	task_scheduler.iniciado[LS_TS_ESTADO] =2;	//No haría falta porque read_init_value_flash ya lo hace.
@@ -357,6 +392,7 @@ void add_new_values_flash()
 {
 	uint16_t value;
 	uint32_t value_32;
+	uint16_t i_correccion, d_correccion;
 
 	if (EE_ReadVariable(0x0002,&value) != 0) EE_WriteVariable(0x0002,1);		//ID_SERVO
 
@@ -407,12 +443,20 @@ void add_new_values_flash()
 	if (EE_ReadVariable(0x0028,&value) != 0) EE_WriteVariable(0x0028,200);		//tiempo_rampa_senoidal 200ms
 	if (EE_ReadVariable(0x0029,&value) != 0) EE_WriteVariable(0x0029,100);		//aceleración_rampa_trapezoidal 100
 
-	if (EE_ReadVariable(0x002A,&value) != 0) EE_WriteVariable(0x002A,5);		//deadband 5
+	if (EE_ReadVariable(0x002A,&value) != 0) EE_WriteVariable(0x002A,5);		//deadband
+
+	if (EE_ReadVariable(0x002B,&value) != 0) EE_WriteVariable(0x002B,0);		//direccion_motor 0
+	
+	for(d_correccion=0x1000,i_correccion=0;i_correccion<256;d_correccion++,i_correccion++)
+	{
+		if (EE_ReadVariable(d_correccion,&value) != 0) EE_WriteVariable(d_correccion,0);
+	}
 }
 uint16_t read_init_flash()
 {
 	uint16_t resultado, temp_value;
 	uint32_t temp_value_l;
+	//uint16_t i_correccion, d_correccion;
 
 	resultado = EE_ReadVariable(0x0002,&temp_value);
 	ID_SERVO = temp_value;
@@ -492,6 +536,15 @@ uint16_t read_init_flash()
 
 	resultado += EE_ReadVariable(0x002A,&temp_value);
 	deadband = temp_value;
+
+	resultado += EE_ReadVariable(0x002B,&temp_value);
+	direccion_motor = temp_value;
+	
+	/*for(d_correccion=0x1000,i_correccion=0;i_correccion<256;d_correccion++,i_correccion++)
+	{
+		resultado += EE_ReadVariable(d_correccion,&temp_value);
+		correccion_enc[i_correccion] = temp_value;
+	}*/
 
 	return(resultado);
 }
@@ -658,9 +711,18 @@ void read_init_value_flash()
 				EE_ReadVariable(0x002A,&temp_value);
 				deadband = temp_value;
 			break;
+			case 138:
+				EE_ReadVariable(0x002B,&temp_value);
+				direccion_motor = temp_value;
+			break;
 			default:
 			break;
 		}
+		/*if(task_scheduler.param_1[LS_TS_ESTADO]>=0x1000 && task_scheduler.param_1[LS_TS_ESTADO]<=0x1100)
+		{
+			EE_ReadVariable(task_scheduler.param_1[LS_TS_ESTADO],&temp_value);
+			correccion_enc[task_scheduler.param_1[LS_TS_ESTADO]-0x1000] = temp_value;
+		}*/
 	}
 	task_scheduler.iniciado[LS_TS_ESTADO] = 2;
 }
@@ -668,6 +730,7 @@ void save_new_values_flash()
 {
 	uint16_t value;
 	uint32_t value_32;
+	//uint16_t i_correccion, d_correccion;
 
 	value = 0;
 	EE_ReadVariable(0x0001,&value);
@@ -762,4 +825,13 @@ void save_new_values_flash()
 
 	EE_ReadVariable(0x002A,&value);
 	if (value != deadband) EE_WriteVariable(0x002A,deadband);													//deadband 5
+
+	EE_ReadVariable(0x002B,&value);
+	if (value != direccion_motor) EE_WriteVariable(0x002B,direccion_motor);										//direccion_motor 0
+	
+	/*for(d_correccion=0x1000,i_correccion=0;i_correccion<256;d_correccion++,i_correccion++)
+	{
+		EE_ReadVariable(d_correccion,&value);
+		if(correccion_enc[i_correccion] != value) EE_WriteVariable(d_correccion,correccion_enc[i_correccion]);
+	}*/
 }

@@ -52,15 +52,6 @@ void tratar_caracter_serial(unsigned char c);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-/****typedef enum
-{
-  FALSE = 0,
-  TRUE = !FALSE
-} boolean;****/
-
-/*#define LED_GREEN LL_GPIO_PIN_4
-#define LED_RED LL_GPIO_PIN_3
-#define LED_BLUE LL_GPIO_PIN_5*/
 
 extern volatile boolean LED_modo_RAINBOW;				//Inicializado en LS_funciones.c
 extern volatile int brillado_led_rgb;
@@ -84,7 +75,7 @@ static char serial_buff[SERIAL_BUFF_SIZE] = { 0 };
 
 extern volatile uint16_t dma_adc1_buff[TAM_DMA_ADC1_BUFF];		//Inicializado en main.c
 
-struct LS_comandos_serial {uint8_t orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]; long times[LS_TASK_SERIAL_SIZE]; long time[LS_TASK_SERIAL_SIZE];uint8_t iniciado[LS_TASK_SERIAL_SIZE];boolean cabecera[LS_TASK_SERIAL_SIZE];};
+struct LS_comandos_serial {uint16_t orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]; long times[LS_TASK_SERIAL_SIZE]; long time[LS_TASK_SERIAL_SIZE];uint8_t iniciado[LS_TASK_SERIAL_SIZE];boolean cabecera[LS_TASK_SERIAL_SIZE];};
 extern volatile struct LS_comandos_serial comandos_serial;			//Inicializado en LS_funciones.c
 extern volatile uint8_t LS_TS_ESTADO_SERIAL, LS_TS_GUARDADO_SERIAL;	//Inicializado en LS_funciones.c
 
@@ -99,6 +90,8 @@ extern volatile uint32_t data_SSI_IN;
 extern volatile uint32_t data_SSI_IN_old;
 extern volatile long data_SSI_IN_internal;
 extern volatile long data_SSI_IN_vuelta;
+
+//extern volatile int correccion_enc[257];				//Inicializado en main.c
 
 volatile float grados_encoder_kalman = 0.0;
 volatile float grados_encoder_kalman_antes = 0.0;
@@ -123,14 +116,12 @@ extern volatile struct LS_temp_task_scheduler temp_task_scheduler;
 struct LS_task_scheduler {uint8_t comando[LS_TASK_SCHEDULER_SIZE];long param_1[LS_TASK_SCHEDULER_SIZE];long param_2[LS_TASK_SCHEDULER_SIZE];long param_3[LS_TASK_SCHEDULER_SIZE];long param_4[LS_TASK_SCHEDULER_SIZE];long param_5[LS_TASK_SCHEDULER_SIZE];long time_comando[LS_TASK_SCHEDULER_SIZE];uint8_t iniciado[LS_TASK_SCHEDULER_SIZE];};
 extern volatile struct LS_task_scheduler task_scheduler;
 extern volatile uint8_t LS_TS_ESTADO, LS_TS_GUARDADO, LS_TEMP_TS_GUARDADO;
-struct LS_comando_motor {uint8_t comando; long pos_now; float velocidad; float aceleracion; float velocidad_int; float aceleracion_int; long pos_destino; float pos_destino_f; long pos_ini; long pos_final; long time_to_end; float step; long time_ramp1; long time_ramp2; float step_ramp1; float step_ramp2;};
+struct LS_comando_motor {uint8_t comando; long pos_now; float velocidad; float aceleracion; float velocidad_int; float aceleracion_int; long pos_destino; float pos_destino_f; long pos_ini; long pos_final; long time_to_end; float step; long time_ramp1; long time_ramp2; float step_ramp1; float step_ramp2; int output_LS;};
 extern volatile struct LS_comando_motor comando_motor;
 static boolean tratando_serie = FALSE;
 
-//extern volatile uint16_t crc_tabccitt[256];
 extern volatile uint16_t uso_crc;
 extern volatile uint16_t CRC_START_CCITT;
-//extern volatile uint16_t CRC_POLY_CCITT;
 
 static uint16_t crc;
 static uint16_t serial_crc;
@@ -147,7 +138,7 @@ comando_serial:	1	->	Move
 */
 static boolean serial_comando_imp = FALSE;
 ////extern volatile uint8_t orden_sensores[TAM_BUFF_SENSORES];
-extern volatile uint8_t temp_orden_sensores[TAM_BUFF_SENSORES];		//Inicializado en LS_funciones.c
+extern volatile uint16_t temp_orden_sensores[TAM_BUFF_SENSORES];		//Inicializado en LS_funciones.c
 static uint8_t i_temp_orden_sensores = 0;
 
 extern volatile boolean send_RS485;
@@ -165,6 +156,8 @@ extern volatile uint8_t LS_TEMP_TS_GUARDADO_SERIAL;
 extern volatile uint8_t bat_estado;						//Inicializado en LS_funciones.c Estado batería 0=Good, 1=LOW, 2=HIGH
 extern volatile uint8_t temp_estado;					//Inicializado en LS_funciones.c Estado temperature 0=Good, 1=HIGH_external, 2=HIGH_internal, 3=HIGH_BOTH
 static boolean deshab_fan3227 = FALSE;
+extern volatile boolean estado_FD;						//Inicializado en main.c
+
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -404,6 +397,9 @@ void DMA1_Channel5_IRQHandler(void)
 void TIM1_BRK_TIM15_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_BRK_TIM15_IRQn 0 */
+	//float t_float, t_float2, t_float3;
+	//uint8_t t_uint8;
+	//long t_long;
 	if(LL_TIM_IsActiveFlag_UPDATE(TIM15) == TRUE)
 	{
 		LL_TIM_ClearFlag_UPDATE(TIM15);
@@ -412,17 +408,50 @@ void TIM1_BRK_TIM15_IRQHandler(void)
 		
 		corriente = (corriente_kalman)*15500/1731;			//15.5A 90mv/A
 		if(corriente < 0) corriente = 0;
-
-		ReadSSI();
+		
+		/************************************************************
+		LL_TIM_DisableIT_UPDATE(TIM15);
+		comando_motor.output_LS = 300;
+		PID_MOTOR = 0;
+		if(ReadSSI() == 1)
+		{
+			int correction_enc [512];
+			uint16_t index = data_SSI_IN/128;
+			data_SSI_IN = data_SSI_IN + correction_enc[index];
+			
+			leer_enc, calcular velocidad y meter en pre_correccion_enc[512]
+			velocidad_correccion = data_SSI_IN - pre_data_SSI_IN;
+			uint16_t index_pre = data_SSI_IN/128;
+			if(pre_correccion_enc[index_pre] == 0)pre_correccion_enc[index_pre] = velocidad_correccion;
+			else pre_correccion_enc[index_pre] = pre_correccion_enc[index_pre] * 0.5 + velocidad_correccion * 0.5;
+		}
+		
+		
+		************************************************************/
+		/*ReadSSI();
 		if(data_SSI_IN<1024 && (data_SSI_IN_old > 65000)) data_SSI_IN_vuelta++;
 		else if(data_SSI_IN>65000 && data_SSI_IN_old<1024) data_SSI_IN_vuelta--;
 
 		data_SSI_IN_old = data_SSI_IN;
 		
 		data_SSI_IN_internal = (long)(data_SSI_IN) + data_SSI_IN_vuelta*65536;
-		grados_encoder_kalman = grados_encoder_kalman+k_encoder*((float)(data_SSI_IN_internal)-grados_encoder_kalman);
+		grados_encoder_kalman = grados_encoder_kalman+k_encoder*((float)(data_SSI_IN_internal)-grados_encoder_kalman);*/
+		/*if(task_scheduler.comando[LS_TS_ESTADO] != 65)
+		{
+			t_float3 = data_SSI_IN/256.0;
+			t_uint8 = t_float3;
+			t_float = correccion_enc[t_uint8];
+			t_uint8++;
+			t_float2 = correccion_enc[t_uint8];
+			t_long = t_float3;
+			t_float3 = t_float3 - t_long;
+			t_float = t_float*(1-t_float3) + t_float2*t_float3;
+			t_float = t_float/4;
+
+			grados_encoder_kalman = grados_encoder_kalman + t_float;
+		}*/
 		
-		comando_motor.velocidad = grados_encoder_kalman - grados_encoder_kalman_antes;
+		comando_motor.velocidad = comando_motor.velocidad*0.9+(grados_encoder_kalman - grados_encoder_kalman_antes)*0.1;
 		comando_motor.aceleracion = comando_motor.velocidad - velocidad_antes;
 		velocidad_antes = comando_motor.velocidad;
 		grados_encoder_kalman_antes = grados_encoder_kalman;
@@ -435,7 +464,7 @@ void TIM1_BRK_TIM15_IRQHandler(void)
 		if (grados_encoder_kalman >= 0) comando_motor.pos_now = grados_encoder_kalman + 0.5f;
 		else comando_motor.pos_now = grados_encoder_kalman - 0.5f;
 
-		comando_motor.pos_now = 0;
+		//comando_motor.pos_now = 0;
 
 		if( PID_MOTOR == 1 ) PID_LS();
 		else if( PID_MOTOR == 2 ) PID_M();
@@ -528,6 +557,13 @@ void TIM1_UP_TIM16_IRQHandler(void)
 					comando_MH();
 					PID_MOTOR = 2;
 					break;
+				case 36:						//FindDirection							S12FD;
+					if(task_scheduler.iniciado[LS_TS_ESTADO] == 0)
+					{
+						estado_FD = TRUE;
+						PID_MOTOR = 0;
+					}
+					break;
 				case 37:						//Motor PWM								S12MP-500;		-900 <-> 900
 					comando_MP();
 					PID_MOTOR = 0;
@@ -545,9 +581,13 @@ void TIM1_UP_TIM16_IRQHandler(void)
 				case 41:
 					comando_LED_RAINBOW();		//Encender el LED RGB en modo arcoíris
 					break;
-				case 60:
+				case 60:						//Tone
 					if(task_scheduler.iniciado[LS_TS_ESTADO] == 0) status_tone = TRUE;
 					break;
+				/*case 65:						//Calibrar el Encoder
+					comando_CE();
+					PID_MOTOR = 0;
+					break;*/
 				default:
 					break;
 			}
@@ -667,6 +707,57 @@ void TIM1_TRG_COM_TIM17_IRQHandler(void)
   /* USER CODE BEGIN TIM1_TRG_COM_TIM17_IRQn 1 */
 
   /* USER CODE END TIM1_TRG_COM_TIM17_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM2 global interrupt.
+  */
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM2_IRQn 0 */
+	/*float t_float, t_float2, t_float3;
+	uint8_t t_uint8;
+	long t_long;*/
+
+	if(LL_TIM_IsActiveFlag_UPDATE(TIM2)==TRUE)
+	{
+		LL_TIM_ClearFlag_UPDATE(TIM2);
+		if(ReadSSI() == 0)
+		{
+			/*if(task_scheduler.comando[LS_TS_ESTADO] != 65)
+			{
+				t_float3 = data_SSI_IN/256.0;
+				t_uint8 = t_float3;
+				t_float = correccion_enc[t_uint8];
+				t_uint8++;
+				t_float2 = correccion_enc[t_uint8];
+				t_long = t_float3;
+				t_float3 = t_float3 - t_long;
+				t_float = t_float*(1-t_float3) + t_float2*t_float3;
+				t_float = t_float/4;
+
+				if(t_float >=0) t_float = t_float + 0.5;
+				else t_float = t_float - 0.5;
+				t_long = data_SSI_IN;
+				t_long = t_long + t_float;
+				if ( t_long < 0 ) data_SSI_IN = 65536 + t_long;
+				else data_SSI_IN = t_long;
+				//grados_encoder_kalman = grados_encoder_kalman + t_float;
+			}*/
+
+			if(data_SSI_IN<1024 && (data_SSI_IN_old > 64511)) data_SSI_IN_vuelta++;
+			else if(data_SSI_IN>64511 && data_SSI_IN_old<1024) data_SSI_IN_vuelta--;
+
+			data_SSI_IN_old = data_SSI_IN;
+			
+			data_SSI_IN_internal = (long)(data_SSI_IN) + data_SSI_IN_vuelta*65536;
+			grados_encoder_kalman = grados_encoder_kalman+k_encoder*((float)(data_SSI_IN_internal)-grados_encoder_kalman);
+		}
+	}
+
+  /* USER CODE END TIM2_IRQn 0 */
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+  /* USER CODE END TIM2_IRQn 1 */
 }
 
 /**
@@ -866,6 +957,8 @@ void tratar_caracter_serial(unsigned char c)
 	
 	Motor Wait [MW] -> 5 {38}		//Espera								S12MW1000;
 
+	FindPolarity [FP] -> 45 {36}	//Encuentra la dirección del motor		S12FP;
+
 	Get [G] -> 50 {10}				//Devolver valor						S12G5;
 	GetSeveral [GS] -> 51 {11}		//Devuelve una o varias variables cada X ms Y veces 				S12GS5,7,8,100,102:10:500;	Devuelve 5 valores 10 veces cada 500ms
 	GetSeveral [Gs] -> 51 {12}		//Devuelve una o varias variables con cabecera (arduino plotter)	S12Gs5,7,8,100,102:10:500;	Devuelve 5 valores 10 veces cada 500ms
@@ -875,12 +968,14 @@ void tratar_caracter_serial(unsigned char c)
 	Save [SV] -> 140 {16}			//Guarda configuración actual a Flash	S12SV;
 	Reset [RV] -> 150 {20} 			//un parámetro (a última vez arrancado)					S12RV105;
 	Reset [Rv] -> 150 {21} 			//un parámetro (a valor original)						S12Rv105;
-	ResetServo [RS]-> 150 {22} 		//todo el servomotor (a valor última vez arrancado)		S12RS;
-	ResetServo [Rs]-> 150 {23} 		//todo el servomotor (a valor original)					S12Rs;
+	ResetServo [RS]-> 150 {22} 		//Todo el servomotor (a valor última vez arrancado)		S12RS;
+	ResetServo [Rs]-> 150 {23} 		//Todo el servomotor (a valor original)					S12Rs;
 
 	LED RGB [L] -> 70 {40}			//Color RGB								S12L150:20:100;
-	LED Rainbow [LR] -> 70 {41}		//Color Rainbow 						LR;
+	LED Rainbow [LR] -> 70 {41}		//Color Rainbow 						S12LR;
 	Tone [T] -> 69 {60}				//Intentar crear un tono				S12T2093:200:50;  Nota 2093Hz [DO6], 200ms, 50% de amplitud
+	
+	CalibrateEncoder [CE]-> 80 {65}	//Calibrar Encoder
 
 	**********************************/
 	switch(estado_serial_LS)  //S1-25,40,150-100M1500:1000!|S5,2,3M10000:3000|S1M1000!#1415;
@@ -995,6 +1090,30 @@ void tratar_caracter_serial(unsigned char c)
 					estado_serial_LS_volver = 70;
 					comando_serial = 40;
 				}
+				else if(c == 'F')
+				{
+					if(serial_LS_ID == ID_SERVO)
+					{
+						serial_sub_comando_yo = TRUE;
+					}
+
+					estado_serial_LS = 0;
+					estado_serial_num = 1;
+					estado_serial_LS_volver = 45;
+					comando_serial = 36;
+				}
+				/*else if(c == 'C')
+				{
+					if(serial_LS_ID == ID_SERVO)
+					{
+						serial_sub_comando_yo = TRUE;
+					}
+
+					estado_serial_LS = 0;
+					estado_serial_num = 1;
+					estado_serial_LS_volver = 80;
+					comando_serial = 65;
+				}*/
 				else
 				{
 					estado_serial_LS = 1;
@@ -1158,6 +1277,28 @@ void tratar_caracter_serial(unsigned char c)
 					estado_serial_num = 1;
 					estado_serial_LS_volver = 70;
 					comando_serial = 40;
+				}
+				else if(c == 'F')
+				{
+					if(serial_LS_ID < serial_LS_ID_fin)
+					{
+						if((serial_LS_ID <= ID_SERVO) && (serial_LS_ID_fin >= ID_SERVO))
+						{
+							serial_sub_comando_yo = TRUE;
+						}
+					}
+					else
+					{
+						if((serial_LS_ID >= ID_SERVO) && (serial_LS_ID_fin <= ID_SERVO))
+						{
+							serial_sub_comando_yo = TRUE;
+						}
+					}
+
+					estado_serial_LS = 0;
+					estado_serial_num = 1;
+					estado_serial_LS_volver = 45;
+					comando_serial = 36;
 				}
 				else
 				{
@@ -1762,7 +1903,17 @@ void tratar_caracter_serial(unsigned char c)
 				}
 			}
 			break;
-		
+		case 45:			//S12F?XXX;
+			if((serial_num_temp == LONG_MIN) && (c == 'P'))
+			{
+				estado_serial_LS = 200;
+			}
+			else
+			{
+				estado_serial_LS = 1;
+				tratando_serie = FALSE;
+			}
+			break;
 		case 50:			//S12G15?XXX;
 			if(serial_num_temp != LONG_MIN && serial_num_temp >= 0)
 			{
@@ -2179,6 +2330,18 @@ void tratar_caracter_serial(unsigned char c)
 				tratando_serie = FALSE;
 			}
 			break;
+		
+		/*case 80:
+			if((serial_num_temp == LONG_MIN) && (c == 'E'))
+			{
+				estado_serial_LS = 200;
+			}
+			else
+			{
+				estado_serial_LS = 1;
+				tratando_serie = FALSE;
+			}
+			break;*/
 		
 	/**********************************
 	Reset [RP] -> 150 {20} 			//un parámetro (a última vez arrancado)

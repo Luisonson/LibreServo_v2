@@ -18,7 +18,7 @@
 
 #include "main.h"
 
-struct LS_comando_motor {uint8_t comando; long pos_now; float velocidad; float aceleracion; long pos_destino; float pos_destino_f; long pos_ini; long pos_final; long time_to_end; float step; long time_ramp1; long time_ramp2; float step_ramp1; float step_ramp2; int output_LS;};
+struct LS_comando_motor {uint8_t comando; long pos_now; float velocidad; float aceleracion; float velocidad_int; float aceleracion_int; long pos_destino; float pos_destino_f; long pos_ini; long pos_final; long time_to_end; float step; long time_ramp1; long time_ramp2; float step_ramp1; float step_ramp2; int output_LS;};
 extern volatile struct LS_comando_motor comando_motor;			//Definido en LS_funciones.c
 long pos_bef_PID_LS,pos_bef_PID_M;
 volatile float ITerm_LS = 0.0;
@@ -31,6 +31,7 @@ extern long buff_sensores[TAM_BUFF_SENSORES];	//Inicializado en main.c
 extern volatile int corriente;					//Inicializado en LS_funciones.c
 extern uint16_t corte_corriente;				//Inicializado en main.c
 extern volatile uint16_t deadband; 				//Inicializado en LS_flash.c
+extern volatile uint8_t direccion_motor;		//Inicializado en LS_flash.c
 
 void PID_LS()
 {
@@ -40,8 +41,12 @@ void PID_LS()
 
 	error = comando_motor.pos_destino - comando_motor.pos_now;
 	if(error > deadband) error = error - deadband;
-	else if(error < -deadband) error = error - deadband;
-	else error = 0;
+	else if(error < -deadband) error = error + deadband;
+	else
+	{
+		error = 0;
+		pos_bef_PID_LS = comando_motor.pos_now;
+	}
 
 	Derror = comando_motor.pos_now - pos_bef_PID_LS;
 	pos_bef_PID_LS = comando_motor.pos_now;
@@ -73,16 +78,31 @@ void PID_LS()
 	if ( output_LS > l_temp ) output_LS = l_temp;
 	else if ( output_LS < -l_temp ) output_LS = -l_temp;
 
-	
-	if(output_LS >=0)
+	if(direccion_motor == 0)
 	{
-		TIM1->CCR2 = 0;
-		TIM1->CCR1 = output_LS;
+		if(output_LS >=0)
+		{
+			TIM1->CCR2 = 0;
+			TIM1->CCR1 = output_LS;
+		}
+		else
+		{
+			TIM1->CCR1 = 0;
+			TIM1->CCR2 = -output_LS;
+		}
 	}
 	else
 	{
-		TIM1->CCR1 = 0;
-		TIM1->CCR2 = -output_LS;
+		if(output_LS >=0)
+		{
+			TIM1->CCR1 = 0;
+			TIM1->CCR2 = output_LS;
+		}
+		else
+		{
+			TIM1->CCR2 = 0;
+			TIM1->CCR1 = -output_LS;
+		}
 	}
 
 	if (error >= 0) l_temp = error + 0.5f;
@@ -139,16 +159,31 @@ void PID_M()
 	if ( output_M > l_temp ) output_M = l_temp;
 	else if ( output_M < -l_temp ) output_M = -l_temp;
 	
-	
-	if(output_M >=0)
+	if(direccion_motor == 0)
 	{
-		TIM1->CCR2 = 0;
-		TIM1->CCR1 = output_M;
+		if(output_M >=0)
+		{
+			TIM1->CCR2 = 0;
+			TIM1->CCR1 = output_M;
+		}
+		else
+		{
+			TIM1->CCR1 = 0;
+			TIM1->CCR2 = -output_M;
+		}
 	}
 	else
 	{
-		TIM1->CCR1 = 0;
-		TIM1->CCR2 = -output_M;
+		if(output_M >=0)
+		{
+			TIM1->CCR1 = 0;
+			TIM1->CCR2 = output_M;
+		}
+		else
+		{
+			TIM1->CCR2 = 0;
+			TIM1->CCR1 = -output_M;
+		}
 	}
 
 	if (error >= 0) l_temp = error + 0.5f;
@@ -167,7 +202,7 @@ void PID_M()
 
 void not_PID()
 {
-	long output_LS, l_temp, old_output_LS;
+	long l_temp, old_output_LS, output_LS;
 	long TIM_autoreload = TIM1->ARR;
 
 	if (TIM1->CCR1 == 0) old_output_LS = TIM1->CCR2;
@@ -180,14 +215,30 @@ void not_PID()
 	else if ( comando_motor.output_LS < -l_temp ) output_LS = -l_temp;
 	else output_LS = comando_motor.output_LS;
 
-	if(output_LS >=0)
+	if(direccion_motor == 0)
 	{
-		TIM1->CCR2 = 0;
-		TIM1->CCR1 = output_LS;
+		if(output_LS >=0)
+		{
+			TIM1->CCR2 = 0;
+			TIM1->CCR1 = output_LS;
+		}
+		else
+		{
+			TIM1->CCR1 = 0;
+			TIM1->CCR2 = -output_LS;
+		}
 	}
 	else
 	{
-		TIM1->CCR1 = 0;
-		TIM1->CCR2 = -output_LS;
+		if(output_LS >=0)
+		{
+			TIM1->CCR1 = 0;
+			TIM1->CCR2 = output_LS;
+		}
+		else
+		{
+			TIM1->CCR2 = 0;
+			TIM1->CCR1 = -output_LS;
+		}
 	}
 }

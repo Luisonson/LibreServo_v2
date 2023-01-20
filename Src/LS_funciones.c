@@ -33,7 +33,7 @@ volatile uint8_t new_led_rgb = TRUE;
 volatile int brillado_led_rgb = 0;
 
 volatile boolean LED_modo_RAINBOW = FALSE;
-volatile uint8_t rgbColor[3] = {255,0,0}; //Empieza con Rojo el arcoíris
+volatile uint8_t rgbColor[3] = {255,0,0}; 		//Empieza con Rojo el arcoíris
 volatile uint8_t decColor = 0;
 volatile uint8_t incColor = 1;
 volatile uint8_t brillo_led = 0;
@@ -43,6 +43,9 @@ extern volatile boolean status_tone;			//Inicializado en main.c
 volatile uint32_t data_SSI_IN;
 uint8_t error_SSI;
 uint8_t paridad_SSI;
+volatile uint16_t data_SSI_error;
+
+//extern volatile int correccion_enc[257];		//Inicializado en main.c
 
 uint16_t q_corriente, q_temp_ext, q_temp_int, q_volts, q_encoder;
 uint16_t varianza_corriente, varianza_temp_ext, varianza_temp_int, varianza_volts, varianza_encoder;
@@ -65,9 +68,9 @@ volatile struct LS_comando_motor comando_motor = {0,0,0.0,0.0,0,0.0,0.0,0.0,0,0,
 
 volatile uint16_t crc_tabccitt[256];
 
-struct LS_temp_comandos_serial {uint8_t orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]; long times[LS_TASK_SERIAL_SIZE]; long time[LS_TASK_SERIAL_SIZE]; boolean prioritaria[LS_TASK_SERIAL_SIZE]; boolean cabecera[LS_TASK_SERIAL_SIZE];};
+struct LS_temp_comandos_serial {uint16_t orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]; long times[LS_TASK_SERIAL_SIZE]; long time[LS_TASK_SERIAL_SIZE]; boolean prioritaria[LS_TASK_SERIAL_SIZE]; boolean cabecera[LS_TASK_SERIAL_SIZE];};
 volatile struct LS_temp_comandos_serial temp_comandos_serial = {{},{0},{0},{0},{0}};
-struct LS_comandos_serial {uint8_t orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]; long times[LS_TASK_SERIAL_SIZE]; long time[LS_TASK_SERIAL_SIZE];uint8_t iniciado[LS_TASK_SERIAL_SIZE]; boolean cabecera[LS_TASK_SERIAL_SIZE];};
+struct LS_comandos_serial {uint16_t orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]; long times[LS_TASK_SERIAL_SIZE]; long time[LS_TASK_SERIAL_SIZE];uint8_t iniciado[LS_TASK_SERIAL_SIZE]; boolean cabecera[LS_TASK_SERIAL_SIZE];};
 volatile struct LS_comandos_serial comandos_serial = {{},{0},{0},{0},{0}};
 volatile uint8_t LS_TS_ESTADO_SERIAL = 0, LS_TEMP_TS_GUARDADO_SERIAL = 0, LS_TS_GUARDADO_SERIAL = 0;
 
@@ -82,7 +85,7 @@ volatile uint8_t enviado_USART1 = TRUE;
 volatile uint8_t recibido_USART1 = FALSE;
 boolean enviado_cabecera = FALSE;
 long buff_sensores[TAM_BUFF_SENSORES];
-volatile uint8_t temp_orden_sensores[TAM_BUFF_SENSORES] = {};
+volatile uint16_t temp_orden_sensores[TAM_BUFF_SENSORES] = {};
 volatile int corriente = 0;
 volatile float corriente_raw = 0;
 volatile float corriente_kalman = 0;
@@ -94,6 +97,7 @@ volatile float voltaje_bat_raw_kalman = 0.0;
 volatile float voltaje_bat_raw = 0;
 volatile uint16_t voltaje_bat = 0;
 volatile uint8_t bat_estado = 0;							//Estado batería 0=Good, 1=LOW, 2=HIGH
+extern volatile float grados_encoder_kalman_antes;
 
 /*volatile float internal_temp_C = 0.0;
 volatile float external_temp_C = 0.0;
@@ -130,6 +134,9 @@ extern volatile uint8_t limit_posicion;					//Inicializado en LS_flash.c limites
 extern volatile uint16_t t_ramp_t, t_ramp_s, a_ramp_t;	//Inicializado en LS_flash.c
 
 extern volatile uint16_t deadband; 						//Inicializado en LS_flash.c
+
+extern volatile boolean estado_FD;						//Inicializado en main.c
+extern volatile uint8_t direccion_motor;				//Inicializado en LS_flash.c
 
 char cabeceras[NUM_VARIABLES][11] =
 { "T_int,",
@@ -210,6 +217,7 @@ void init_variables()
 	for(i = 0;i < LS_TASK_SCHEDULER_SIZE;i++) {task_scheduler.iniciado[i] = 5;}
 	for(i = 0;i < LS_TASK_SERIAL_SIZE;i++) {comandos_serial.iniciado[i] = 5;}
 	for(i = 0;i < TAM_BUFF_SENSORES;i++) {temp_orden_sensores[i] = 255;}
+	//for(i = 0;i < 512;i++) {correccion_enc[i] = -32768;}
 
 	media_pendiente_temp = 80/(float)((int)*TEMPSENSOR_CAL2_ADDR-(int)*TEMPSENSOR_CAL1_ADDR);
 }
@@ -392,6 +400,102 @@ void comando_tone()
 	}
 }
 
+void comando_FD()			//Función que BLOQUEA
+{
+	long pos_encoder;
+
+	if (task_scheduler.iniciado[LS_TS_ESTADO] == 0)
+	{
+		task_scheduler.iniciado[LS_TS_ESTADO] = 1;
+		pos_encoder = comando_motor.pos_now;
+		for(int temp_i = 10; temp_i < 900; temp_i = temp_i +10)
+		{
+			comando_motor.output_LS = temp_i;
+			Delay_ms(50);
+			if(comando_motor.pos_now > pos_encoder + 50)
+			{
+				direccion_motor = 0;
+				temp_i = 900;
+			}
+			else if(comando_motor.pos_now < pos_encoder - 50)
+			{
+				direccion_motor = 1;
+				temp_i = 900;
+			}
+		}
+		comando_motor.output_LS = 0;
+		EE_WriteVariable(0x002B,direccion_motor);
+		task_scheduler.iniciado[LS_TS_ESTADO] = 2;
+	}
+}
+
+/*void comando_CE()
+{
+	long temp_l;
+	uint16_t index_pre;
+	float t_float;
+
+	if (task_scheduler.iniciado[LS_TS_ESTADO] == 0)
+	{
+		for(index_pre = 0;index_pre < 256;index_pre++) {correccion_enc[index_pre] = -32768;}
+		task_scheduler.iniciado[LS_TS_ESTADO] = 1;
+		comando_motor.output_LS = 900;
+		correccion_enc[256] = -1000;
+	}
+	else if(correccion_enc[256] < 0) correccion_enc[256]++;		//Espera de un segundo aproximadamente
+	else if(task_scheduler.iniciado[LS_TS_ESTADO] == 1)
+	{
+		temp_l = grados_encoder_kalman_antes;
+		while(temp_l>=65536) temp_l = temp_l - 65536;
+		while(temp_l<0) temp_l = temp_l + 65536;
+		
+		index_pre = temp_l/256;
+
+		if(correccion_enc[index_pre] == -32768)
+		{
+			t_float = comando_motor.velocidad * 100;
+			if(t_float >=0) t_float = t_float + 0.5;
+			else t_float = t_float - 0.5;
+			correccion_enc[index_pre] = t_float;
+			correccion_enc[256]++;
+			F_LED_RGB(correccion_enc[256]/2,0,0);
+		}
+		else
+		{
+			t_float = correccion_enc[index_pre] * 0.5 + (comando_motor.velocidad *100) * 0.5;
+			if (t_float > 32766) t_float = 32766;
+			else if (t_float < -32766) t_float = -32766;
+			if(t_float >=0) t_float = t_float + 0.5;
+			else t_float = t_float - 0.5;
+			correccion_enc[index_pre] = t_float;
+			if(correccion_enc[256] >= 256) correccion_enc[256]++;
+		}
+		if(correccion_enc[256] >= 256)
+		{
+			index_pre = (correccion_enc[256]/40-1);
+			F_LED_RGB(0,index_pre,0);
+		}
+		if(correccion_enc[256] == 10240)
+		{
+			F_LED_RGB(0,0,0);
+			comando_motor.output_LS = 0;
+			task_scheduler.iniciado[LS_TS_ESTADO] = 2;
+			t_float = 0;
+			for(uint16_t i=0;i<256;i++)
+			{
+				t_float = t_float + correccion_enc[i];
+			}
+			t_float = (t_float / 256) + 0.5;
+			index_pre = t_float;
+			correccion_enc[0] = index_pre - correccion_enc[0];
+			for(uint16_t i=1;i<256;i++)
+			{
+				correccion_enc[i] = correccion_enc[i-1] + (index_pre - correccion_enc[i]);
+			}
+		}
+	}
+}*/
+
 void int_to_char(char *str, long my_int)
 {
 	//uint8_t len_string = 10;
@@ -514,370 +618,269 @@ void comando_get()
 
 		if(ticks - tiempo_RS485 >= comandos_serial.time[LS_TS_ESTADO_SERIAL])
 		{
-		  if(enviado_USART1 == TRUE && comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][0] != 255)
-		  {
-			  buff_sensores[9] = (uint16_t)corriente;
-			  buff_sensores[10] = (uint16_t)corriente_raw;
-			  buff_sensores[11] = (uint16_t)corriente_kalman;
-			  buff_sensores[12] = (uint16_t)data_SSI_IN_internal;
-			  buff_sensores[13] = comando_motor.pos_now;
-			  buff_sensores[14] = (long)(comando_motor.velocidad*1000);
-			  buff_sensores[15] = (long)(comando_motor.aceleracion*1000);
-			  buff_sensores[16] = (long)(comando_motor.velocidad_int*1000);
-			  buff_sensores[17] = (long)(comando_motor.aceleracion_int*1000);
-			  buff_sensores[18] = comando_motor.pos_destino;
-			  if (TIM1->CCR1 == 0) buff_sensores[23] = TIM1->CCR2;
-			  else buff_sensores[23] = TIM1->CCR1;
-			  buff_sensores[24] = comando_motor.output_LS;
+			if(enviado_USART1 == TRUE && comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][0] != 255)
+			{
+				buff_sensores[9] = (uint16_t)corriente;
+				buff_sensores[10] = (uint16_t)corriente_raw;
+				buff_sensores[11] = (uint16_t)corriente_kalman;
+				buff_sensores[12] = (uint16_t)data_SSI_IN_internal;
+				buff_sensores[13] = comando_motor.pos_now;
+				buff_sensores[14] = (long)(comando_motor.velocidad*1000);
+				buff_sensores[15] = (long)(comando_motor.aceleracion*1000);
+				buff_sensores[16] = (long)(comando_motor.velocidad_int*1000);
+				buff_sensores[17] = (long)(comando_motor.aceleracion_int*1000);
+				buff_sensores[18] = comando_motor.pos_destino;
+				if (TIM1->CCR1 == 0) buff_sensores[23] = TIM1->CCR2;
+				else buff_sensores[23] = TIM1->CCR1;
+				buff_sensores[24] = comando_motor.output_LS;
+				buff_sensores[25] = data_SSI_error;
 
-			  tiempo_RS485 = ticks;
+				tiempo_RS485 = ticks;
 
-			  comandos_serial.times[LS_TS_ESTADO_SERIAL]--;
-			  if(comandos_serial.times[LS_TS_ESTADO_SERIAL] == 0) send_RS485 = FALSE;
+				comandos_serial.times[LS_TS_ESTADO_SERIAL]--;
+				if(comandos_serial.times[LS_TS_ESTADO_SERIAL] == 0) send_RS485 = FALSE;
 
-			  memset(dma_tx_buff,0,strlen(dma_tx_buff));  //Vaciamos buffer de envío
-			  //orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]
+				memset(dma_tx_buff,0,strlen(dma_tx_buff));  //Vaciamos buffer de envío
+				//orden_sensores[LS_TASK_SERIAL_SIZE][TAM_BUFF_SENSORES]
 
-			  if (comandos_serial.cabecera[LS_TS_ESTADO_SERIAL] == TRUE && enviado_cabecera == FALSE)
-			  {
-				  enviado_cabecera = TRUE;
-				  //for(uint8_t i_RS485 = 0;i_RS485 < TAM_BUFF_SENSORES && comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485] != 255 && string_len < DMA_TX_BUFF_SIZE;i_RS485++)
-				  for(uint8_t i_RS485 = 0;i_RS485 < TAM_BUFF_SENSORES && string_len < DMA_TX_BUFF_SIZE;i_RS485++)
-				  {
-					  num_cabecera = comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485];
-					  if (num_cabecera == 255) break;
-					  if(num_cabecera >= 99) num_cabecera = num_cabecera - (99 - TAM_BUFF_SENSORES);
-					  if(num_cabecera <= NUM_VARIABLES)
-					  {
-						  for(uint8_t i_array = 0;cabeceras[num_cabecera][i_array] != '\0';i_array++)
-						  {
-							  dma_tx_buff[string_len]=cabeceras[num_cabecera][i_array];
-							  string_len++;
-						  }
-					  }
-				  }
+				if (comandos_serial.cabecera[LS_TS_ESTADO_SERIAL] == TRUE && enviado_cabecera == FALSE)
+				{
+					enviado_cabecera = TRUE;
+					//for(uint8_t i_RS485 = 0;i_RS485 < TAM_BUFF_SENSORES && comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485] != 255 && string_len < DMA_TX_BUFF_SIZE;i_RS485++)
+					for(uint8_t i_RS485 = 0;i_RS485 < TAM_BUFF_SENSORES && string_len < DMA_TX_BUFF_SIZE;i_RS485++)
+					{
+						num_cabecera = comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485];
+						if (num_cabecera == 255) break;
+						if(num_cabecera >= 99) num_cabecera = num_cabecera - (99 - TAM_BUFF_SENSORES);
+						if(num_cabecera <= NUM_VARIABLES)
+						{
+							for(uint8_t i_array = 0;cabeceras[num_cabecera][i_array] != '\0';i_array++)
+							{
+								dma_tx_buff[string_len]=cabeceras[num_cabecera][i_array];
+								string_len++;
+							}
+						}
+					}
 
-				  if (string_len > 0)
-				  {
+					if (string_len > 0)
+					{
+						dma_tx_buff[string_len-1]=10;
+						dma_tx_buff[string_len]=13;
+						string_len++;
+					}
+				}
+
+				for(uint8_t i_RS485 = 0;i_RS485 < TAM_BUFF_SENSORES && comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485] != 1024 && string_len < DMA_TX_BUFF_SIZE;i_RS485++)
+				{
+					if (comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485] < TAM_BUFF_SENSORES && comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485] >= 0)
+					{
+						int_to_char(&dma_tx_buff[string_len],(long)(buff_sensores[comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485]]));
+						string_len = strlen(dma_tx_buff);
+						dma_tx_buff[string_len]=',';
+						string_len++;
+					}
+					/*else if (comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485] >= 256 && comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485] < 512)
+					{
+						int_to_char(&dma_tx_buff[string_len],(long)((correccion_enc[(comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485]-256)])));
+						string_len = strlen(dma_tx_buff);
+						dma_tx_buff[string_len]=',';
+						string_len++;
+						comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485]++;
+					}*/
+					else
+					{
+						switch (comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485])
+						{
+							case 99:
+							  int_to_char(&dma_tx_buff[string_len],(long)(version_LS));
+							  break;
+							case 100:
+							  int_to_char(&dma_tx_buff[string_len],(long)(ID_SERVO));
+							  break;
+							case 101:
+							  int_to_char(&dma_tx_buff[string_len],(long)(q_corriente));
+							  break;
+							case 102:
+							  int_to_char(&dma_tx_buff[string_len],(long)(q_temp_ext));
+							  break;
+							case 103:
+							  int_to_char(&dma_tx_buff[string_len],(long)(q_temp_int));
+							  break;
+							case 104:
+							  int_to_char(&dma_tx_buff[string_len],(long)(q_volts));
+							  break;
+							case 105:
+							  int_to_char(&dma_tx_buff[string_len],(long)(q_encoder));
+							  break;
+							case 106:
+							  int_to_char(&dma_tx_buff[string_len],(long)(varianza_corriente));
+							  break;
+							case 107:
+							  int_to_char(&dma_tx_buff[string_len],(long)(varianza_temp_ext));
+							  break;
+							case 108:
+							  int_to_char(&dma_tx_buff[string_len],(long)(varianza_temp_int));
+							  break;
+							case 109:
+							  int_to_char(&dma_tx_buff[string_len],(long)(varianza_volts));
+							  break;
+							case 110:
+							  int_to_char(&dma_tx_buff[string_len],(long)(varianza_encoder));
+							  break;
+							case 111:
+							  int_to_char(&dma_tx_buff[string_len],(long)(vel_serie));
+							  break;
+							case 112:
+							  int_to_char(&dma_tx_buff[string_len],(long)(corte_temp_ext));
+							  break;
+							case 113:
+							  int_to_char(&dma_tx_buff[string_len],(long)(corte_temp_int));
+							  break;
+							case 114:
+							  int_to_char(&dma_tx_buff[string_len],(long)(corte_volts_alto));
+							  break;
+							case 115:
+							  int_to_char(&dma_tx_buff[string_len],(long)(corte_volts_bajo));
+							  break;
+							case 116:
+							  int_to_char(&dma_tx_buff[string_len],(long)(corte_corriente));
+							  break;
+							case 117:
+							  int_to_char(&dma_tx_buff[string_len],(long)(uso_crc));
+							  break;
+							case 118:
+							  int_to_char(&dma_tx_buff[string_len],(long)(CRC_START_CCITT));
+							  break;
+							case 119:
+							  int_to_char(&dma_tx_buff[string_len],(long)(CRC_POLY_CCITT));
+							  break;
+							case 120:
+							  int_to_char(&dma_tx_buff[string_len],(long)(K_P_LS));
+							  break;
+							case 121:
+							  int_to_char(&dma_tx_buff[string_len],(long)(K_D_LS));
+							  break;
+							case 122:
+							  int_to_char(&dma_tx_buff[string_len],(long)(K_I_LS));
+							  break;
+							case 123:
+							  int_to_char(&dma_tx_buff[string_len],(long)(K_P_M));
+							  break;
+							case 124:
+							  int_to_char(&dma_tx_buff[string_len],(long)(K_D_M));
+							  break;
+							case 125:
+							  int_to_char(&dma_tx_buff[string_len],(long)(K_I_M));
+							  break;
+							case 126:
+							  int_to_char(&dma_tx_buff[string_len],(long)(offset_corriente*9));
+							  break;
+							case 127:
+							  int_to_char(&dma_tx_buff[string_len],(long)(offset_temp_int*10+150));
+							  break;
+							case 128:
+							  int_to_char(&dma_tx_buff[string_len],(long)(offset_temp_ext*10+150));
+							  break;
+							case 129:
+							  int_to_char(&dma_tx_buff[string_len],(long)(envio_si_leo));
+							  break;
+							case 130:
+							  int_to_char(&dma_tx_buff[string_len],(long)(saludo_inicial));
+							  break;
+							case 131:
+							  int_to_char(&dma_tx_buff[string_len],(long)(min_posicion + LONG_MIN));
+							  break;
+							case 132:
+							  int_to_char(&dma_tx_buff[string_len],(long)(max_posicion + LONG_MIN));
+							  break;
+							case 133:
+							  int_to_char(&dma_tx_buff[string_len],(long)(limit_posicion));
+							  break;
+							case 134:
+							  int_to_char(&dma_tx_buff[string_len],(long)(t_ramp_t));
+							  break;
+							case 135:
+							  int_to_char(&dma_tx_buff[string_len],(long)(t_ramp_s));
+							  break;
+							case 136:
+							  int_to_char(&dma_tx_buff[string_len],(long)(a_ramp_t));
+							  break;
+							case 137:
+							  int_to_char(&dma_tx_buff[string_len],(long)(deadband));
+							  break;
+							case 138:
+							  int_to_char(&dma_tx_buff[string_len],(long)(direccion_motor));
+							  break;
+							default:
+							break;
+						}
+						string_len = strlen(dma_tx_buff);
+						dma_tx_buff[string_len]=',';
+						string_len++;
+					}
+				}
+				
+				if (string_len > 0)
+				{
 					dma_tx_buff[string_len-1]=10;
 					dma_tx_buff[string_len]=13;
-					string_len++;
-				  }
-			  }
+				}
+				if( recibido_USART1 == FALSE)
+				{
+					enviado_USART1 = FALSE;
+					LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, strlen(dma_tx_buff));
+					GPIOB->BSRR=LL_GPIO_PIN_5;
+					LL_DMA_EnableChannel(DMA1,LL_DMA_CHANNEL_4);
+				}
+				else if ( envio_si_leo == 2)		//Dejo de enviar el comando de envío actual
+				{
+					comandos_serial.iniciado[LS_TS_ESTADO_SERIAL] = 3;
+					send_RS485 = FALSE;
+					recibido_USART1 = FALSE;
+				}
+				else if ( envio_si_leo == 1)		//Dejo de enviar.
+				{
+					for ( uint8_t i = 0; i < LS_TASK_SERIAL_SIZE; i++)
+					{
+						if(comandos_serial.iniciado[i] == 1 || comandos_serial.iniciado[i] == 0) comandos_serial.iniciado[i] = 3;
+					}
+					send_RS485 = FALSE;
+					if(LS_TS_GUARDADO_SERIAL == 0) LS_TS_ESTADO_SERIAL = LS_TASK_SERIAL_SIZE - 1;
+					else LS_TS_ESTADO_SERIAL = LS_TS_GUARDADO_SERIAL - 1;
+				}
+				else				//Envío de todos modos [NO ACONSEJABLE]
+				{
+					recibido_USART1 = FALSE;
+					enviado_USART1 = FALSE;
+					LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, strlen(dma_tx_buff));
+					GPIOB->BSRR=LL_GPIO_PIN_5;
+					LL_DMA_EnableChannel(DMA1,LL_DMA_CHANNEL_4);
+				}
+			}
+			else if (comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][0] == 255)
+			{
+				tiempo_RS485 = ticks;
 
-			  for(uint8_t i_RS485 = 0;i_RS485 < TAM_BUFF_SENSORES && comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485] != 255 && string_len < DMA_TX_BUFF_SIZE;i_RS485++)
-			  {
-				  if (comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485] < TAM_BUFF_SENSORES && comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485] >= 0)
-				  {
-					  int_to_char(&dma_tx_buff[string_len],(long)(buff_sensores[comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485]]));
-					  string_len = strlen(dma_tx_buff);
-					  dma_tx_buff[string_len]=',';
-					  string_len++;
-				  }
-				  else
-				  {
-					  switch (comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][i_RS485])
-					  {
-						  case 99:
-							int_to_char(&dma_tx_buff[string_len],(long)(version_LS));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 100:
-							int_to_char(&dma_tx_buff[string_len],(long)(ID_SERVO));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 101:
-							int_to_char(&dma_tx_buff[string_len],(long)(q_corriente));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 102:
-							int_to_char(&dma_tx_buff[string_len],(long)(q_temp_ext));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 103:
-							int_to_char(&dma_tx_buff[string_len],(long)(q_temp_int));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 104:
-							int_to_char(&dma_tx_buff[string_len],(long)(q_volts));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 105:
-							int_to_char(&dma_tx_buff[string_len],(long)(q_encoder));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 106:
-							int_to_char(&dma_tx_buff[string_len],(long)(varianza_corriente));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 107:
-							int_to_char(&dma_tx_buff[string_len],(long)(varianza_temp_ext));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 108:
-							int_to_char(&dma_tx_buff[string_len],(long)(varianza_temp_int));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 109:
-							int_to_char(&dma_tx_buff[string_len],(long)(varianza_volts));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 110:
-							int_to_char(&dma_tx_buff[string_len],(long)(varianza_encoder));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 111:
-							int_to_char(&dma_tx_buff[string_len],(long)(vel_serie));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 112:
-							int_to_char(&dma_tx_buff[string_len],(long)(corte_temp_ext));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 113:
-							int_to_char(&dma_tx_buff[string_len],(long)(corte_temp_int));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 114:
-							int_to_char(&dma_tx_buff[string_len],(long)(corte_volts_alto));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 115:
-							int_to_char(&dma_tx_buff[string_len],(long)(corte_volts_bajo));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 116:
-							int_to_char(&dma_tx_buff[string_len],(long)(corte_corriente));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 117:
-							int_to_char(&dma_tx_buff[string_len],(long)(uso_crc));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 118:
-							int_to_char(&dma_tx_buff[string_len],(long)(CRC_START_CCITT));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 119:
-							int_to_char(&dma_tx_buff[string_len],(long)(CRC_POLY_CCITT));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 120:
-							int_to_char(&dma_tx_buff[string_len],(long)(K_P_LS));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 121:
-							int_to_char(&dma_tx_buff[string_len],(long)(K_D_LS));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 122:
-							int_to_char(&dma_tx_buff[string_len],(long)(K_I_LS));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 123:
-							int_to_char(&dma_tx_buff[string_len],(long)(K_P_M));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 124:
-							int_to_char(&dma_tx_buff[string_len],(long)(K_D_M));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 125:
-							int_to_char(&dma_tx_buff[string_len],(long)(K_I_M));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 126:
-							int_to_char(&dma_tx_buff[string_len],(long)(offset_corriente*9));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 127:
-							int_to_char(&dma_tx_buff[string_len],(long)(offset_temp_int*10+150));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 128:
-							int_to_char(&dma_tx_buff[string_len],(long)(offset_temp_ext*10+150));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 129:
-							int_to_char(&dma_tx_buff[string_len],(long)(envio_si_leo));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 130:
-							int_to_char(&dma_tx_buff[string_len],(long)(saludo_inicial));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 131:
-							int_to_char(&dma_tx_buff[string_len],(long)(min_posicion + LONG_MIN));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 132:
-							int_to_char(&dma_tx_buff[string_len],(long)(max_posicion + LONG_MIN));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 133:
-							int_to_char(&dma_tx_buff[string_len],(long)(limit_posicion));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 134:
-							int_to_char(&dma_tx_buff[string_len],(long)(t_ramp_t));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 135:
-							int_to_char(&dma_tx_buff[string_len],(long)(t_ramp_s));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 136:
-							int_to_char(&dma_tx_buff[string_len],(long)(a_ramp_t));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  case 137:
-							int_to_char(&dma_tx_buff[string_len],(long)(deadband));
-							string_len = strlen(dma_tx_buff);
-							dma_tx_buff[string_len]=',';
-							string_len++;
-						  break;
-						  default:
-						  break;
-					  }
-				  }
-			  }
-			  if (string_len > 0)
-			  {
-				dma_tx_buff[string_len-1]=10;
-				dma_tx_buff[string_len]=13;
-			  }
-			  if( recibido_USART1 == FALSE)
-			  {
-				  enviado_USART1 = FALSE;
-				  LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, strlen(dma_tx_buff));
-				  GPIOB->BSRR=LL_GPIO_PIN_5;
-				  LL_DMA_EnableChannel(DMA1,LL_DMA_CHANNEL_4);
-			  }
-			  else if ( envio_si_leo == 2)		//Dejo de enviar el comando de envío actual
-			  {
-				  comandos_serial.iniciado[LS_TS_ESTADO_SERIAL] = 3;
-				  send_RS485 = FALSE;
-				  recibido_USART1 = FALSE;
-			  }
-			  else if ( envio_si_leo == 1)		//Dejo de enviar.
-			  {
-				  for ( uint8_t i = 0; i < LS_TASK_SERIAL_SIZE; i++)
-				  {
-					  if(comandos_serial.iniciado[i] == 1 || comandos_serial.iniciado[i] == 0) comandos_serial.iniciado[i] = 3;
-				  }
-				  send_RS485 = FALSE;
-				  if(LS_TS_GUARDADO_SERIAL == 0) LS_TS_ESTADO_SERIAL = LS_TASK_SERIAL_SIZE - 1;
-				  else LS_TS_ESTADO_SERIAL = LS_TS_GUARDADO_SERIAL - 1;
-			  }
-			  else				//Envío de todos modos [NO ACONSEJABLE]
-			  {
-				  recibido_USART1 = FALSE;
-				  enviado_USART1 = FALSE;
-				  LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_4, strlen(dma_tx_buff));
-				  GPIOB->BSRR=LL_GPIO_PIN_5;
-				  LL_DMA_EnableChannel(DMA1,LL_DMA_CHANNEL_4);
-			  }
-		  }
-		  else if (comandos_serial.orden_sensores[LS_TS_ESTADO_SERIAL][0] == 255)
-		  {
-			  tiempo_RS485 = ticks;
-
-			  comandos_serial.times[LS_TS_ESTADO_SERIAL] = 0;
-			  send_RS485 = FALSE;
-		  }
-		  if( send_RS485 == FALSE )
-		  {
-			  comandos_serial.iniciado[LS_TS_ESTADO_SERIAL] = 2;
-			  LS_TS_ESTADO_SERIAL++;
-			  if( LS_TS_ESTADO_SERIAL == LS_TASK_SERIAL_SIZE) LS_TS_ESTADO_SERIAL = 0;
-		  }
+				comandos_serial.times[LS_TS_ESTADO_SERIAL] = 0;
+				send_RS485 = FALSE;
+			}
+			if( send_RS485 == FALSE )
+			{
+				comandos_serial.iniciado[LS_TS_ESTADO_SERIAL] = 2;
+				LS_TS_ESTADO_SERIAL++;
+				if( LS_TS_ESTADO_SERIAL == LS_TASK_SERIAL_SIZE) LS_TS_ESTADO_SERIAL = 0;
+			}
 		}
 	}
 	else if(send_RS485 == FALSE && comandos_serial.iniciado[LS_TS_ESTADO_SERIAL] == 1)
 	{
-	  comandos_serial.iniciado[LS_TS_ESTADO_SERIAL] = 2;
-	  LS_TS_ESTADO_SERIAL++;
-	  if( LS_TS_ESTADO_SERIAL == LS_TASK_SERIAL_SIZE) LS_TS_ESTADO_SERIAL = 0;
+		comandos_serial.iniciado[LS_TS_ESTADO_SERIAL] = 2;
+		LS_TS_ESTADO_SERIAL++;
+		if( LS_TS_ESTADO_SERIAL == LS_TASK_SERIAL_SIZE) LS_TS_ESTADO_SERIAL = 0;
 	}
 }
 
-void ReadSSI()
+uint8_t ReadSSI()
 {
     uint8_t bit,i;
 
@@ -899,6 +902,11 @@ void ReadSSI()
     error_SSI=(data_SSI_IN & 0x0f);
     data_SSI_IN=data_SSI_IN>>4;
     error_SSI=error_SSI>>1;
+    data_SSI_error = error_SSI;
+	
+    return(paridad_SSI);
+	//if(paridad_SSI == 0) return(error_SSI); //Magnet High (MHI) Error || Magnet Low (MLO) Error || Ready  --> 001 OK
+	//else return(8);
 
 }
 
@@ -1035,7 +1043,7 @@ void copy_temp_to_task()
 	}
 }
 
-void new_temp_serial_task(volatile uint8_t n_orden_sensores[TAM_BUFF_SENSORES],uint8_t num_sensores,long n_param_1,long n_param_2, boolean prioritaria, boolean cabecera)
+void new_temp_serial_task(volatile uint16_t n_orden_sensores[TAM_BUFF_SENSORES],uint8_t num_sensores,long n_param_1,long n_param_2, boolean prioritaria, boolean cabecera)
 {
 	uint8_t i;
 	if(LS_TEMP_TS_GUARDADO_SERIAL == LS_TASK_SERIAL_SIZE) LS_TEMP_TS_GUARDADO_SERIAL = LS_TASK_SERIAL_SIZE - 1;
@@ -1045,7 +1053,7 @@ void new_temp_serial_task(volatile uint8_t n_orden_sensores[TAM_BUFF_SENSORES],u
 	}
 	for(i=i;i < TAM_BUFF_SENSORES; i++)
 	{
-		temp_comandos_serial.orden_sensores[LS_TEMP_TS_GUARDADO_SERIAL][i] = 255;
+		temp_comandos_serial.orden_sensores[LS_TEMP_TS_GUARDADO_SERIAL][i] = 1024;
 	}
 	temp_comandos_serial.times[LS_TEMP_TS_GUARDADO_SERIAL] = n_param_1;
 	temp_comandos_serial.time[LS_TEMP_TS_GUARDADO_SERIAL] = n_param_2;
@@ -1067,7 +1075,7 @@ void copy_temp_to_task_serial()
 		for(i = 0;i < TAM_BUFF_SENSORES; i++)
 		{
 			comandos_serial.orden_sensores[LS_TS_GUARDADO_SERIAL][i] = temp_comandos_serial.orden_sensores[b][i];
-			temp_comandos_serial.orden_sensores[b][i] = 255;
+			temp_comandos_serial.orden_sensores[b][i] = 1024;
 		}
 		/*if(temp_comandos_serial.times[b] > 0) comandos_serial.times[LS_TS_GUARDADO_SERIAL] = temp_comandos_serial.times[b];
 		else comandos_serial.times[LS_TS_GUARDADO_SERIAL] = DEFAULT_TIMES;
@@ -1092,164 +1100,178 @@ void comando_set_value()
 		{
 			switch (task_scheduler.param_1[LS_TS_ESTADO])
 			{
-			  case 100:
-				if(temp_param2 <= 255)ID_SERVO = temp_param2;
-			  break;
-			  case 101:
-				q_corriente = temp_param2;
-				get_kalman_gains();
-			  break;
-			  case 102:
-				q_temp_ext = temp_param2;
-				get_kalman_gains();
-			  break;
-			  case 103:
-				q_temp_int = temp_param2;
-				get_kalman_gains();
-			  break;
-			  case 104:
-				q_volts = temp_param2;
-				get_kalman_gains();
-			  break;
-			  case 105:
-				q_encoder = temp_param2;
-				get_kalman_gains();
-			  break;
-			  case 106:
-				varianza_corriente = temp_param2;
-				get_kalman_gains();
-			  break;
-			  case 107:
-				varianza_temp_ext = temp_param2;
-				get_kalman_gains();
-			  break;
-			  case 108:
-				varianza_temp_int = temp_param2;
-				get_kalman_gains();
-			  break;
-			  case 109:
-				varianza_volts = temp_param2;
-				get_kalman_gains();
-			  break;
-			  case 110:
-				varianza_encoder = temp_param2;
-				get_kalman_gains();
-			  break;
-			  case 111:
-				vel_serie = temp_param2;
-				change_USART1_speed();
-			  break;
-			  case 112:
-				corte_temp_ext = temp_param2;
-			  break;
-			  case 113:
-				corte_temp_int = temp_param2;
-			  break;
-			  case 114:
-				corte_volts_alto = temp_param2;
-			  break;
-			  case 115:
-				corte_volts_bajo = temp_param2;
-			  break;
-			  case 116:
-				corte_corriente = temp_param2;
-			  break;
-			  case 117:
-				if( temp_param2 < 3 ) uso_crc = temp_param2;
-			  break;
-			  case 118:
-				CRC_START_CCITT = temp_param2;
-			  break;
-			  case 119:
-				CRC_POLY_CCITT = temp_param2;
-				init_crcccitt_tab();
-			  break;
-			  case 120:
-				K_P_LS = temp_param2;
-				K_P_LS_f = (float)K_P_LS/100;
-			  break;
-			  case 121:
-				K_D_LS = temp_param2;
-				K_D_LS_f = (float)K_D_LS/100;
-			  break;
-			  case 122:
-				K_I_LS = temp_param2;
-				K_I_LS_f = (float)K_I_LS/10000;
-			  break;
-			  case 123:
-				K_P_M = temp_param2;
-				K_P_M_f = (float)K_P_M/100;
-			  break;
-			  case 124:
-				K_D_M = temp_param2;
-				K_D_M_f = (float)K_D_M/100;
-			  break;
-			  case 125:
-				K_I_M = temp_param2;
-				K_I_M_f = (float)K_I_M/10000;
-			  break;
-			  case 126:
-				if(temp_param2 <= 1000) offset_corriente = temp_param2 / 9;
-			  break;
-			  case 127:
-				if(temp_param2 <= 150) offset_temp_int = temp_param2 / 10;
-			  break;
-			  case 128:
-				if(temp_param2 <= 150) offset_temp_ext = temp_param2 / 10;
-			  break;
-			  case 129:
-				if( temp_param2 < 3 ) envio_si_leo = temp_param2;
-			  break;
-			  case 130:
-				if( temp_param2 < 2 ) saludo_inicial = temp_param2;
-			  break;
-			  case 131:
-				min_posicion = temp_param2;
-			  break;
-			  case 132:
-				max_posicion = temp_param2;
-			  break;
-			  case 133:
-				if( temp_param2 < 2 ) limit_posicion = temp_param2;
-			  break;
-			  case 134:
-				t_ramp_t = temp_param2;
-			  break;
-			  case 135:
-				t_ramp_s = temp_param2;
-			  break;
-			  case 136:
-				a_ramp_t = temp_param2;
-			  break;
-			  case 137:
-				if(temp_param2 <= 1000) deadband = temp_param2;
-			  break;
-			  default:
-			  break;
+				case 100:
+				  if(temp_param2 <= 255)ID_SERVO = temp_param2;
+				  break;
+				case 101:
+				  q_corriente = temp_param2;
+				  get_kalman_gains();
+				  break;
+				case 102:
+				  q_temp_ext = temp_param2;
+				  get_kalman_gains();
+				  break;
+				case 103:
+				  q_temp_int = temp_param2;
+				  get_kalman_gains();
+				  break;
+				case 104:
+				  q_volts = temp_param2;
+				  get_kalman_gains();
+				  break;
+				case 105:
+				  q_encoder = temp_param2;
+				  get_kalman_gains();
+				  break;
+				case 106:
+				  varianza_corriente = temp_param2;
+				  get_kalman_gains();
+				  break;
+				case 107:
+				  varianza_temp_ext = temp_param2;
+				  get_kalman_gains();
+				  break;
+				case 108:
+				  varianza_temp_int = temp_param2;
+				  get_kalman_gains();
+				  break;
+				case 109:
+				  varianza_volts = temp_param2;
+				  get_kalman_gains();
+				  break;
+				case 110:
+				  varianza_encoder = temp_param2;
+				  get_kalman_gains();
+				  break;
+				case 111:
+				  vel_serie = temp_param2;
+				  change_USART1_speed();
+				  break;
+				case 112:
+				  corte_temp_ext = temp_param2;
+				  break;
+				case 113:
+				  corte_temp_int = temp_param2;
+				  break;
+				case 114:
+				  corte_volts_alto = temp_param2;
+				  break;
+				case 115:
+				  corte_volts_bajo = temp_param2;
+				  break;
+				case 116:
+				  corte_corriente = temp_param2;
+				  break;
+				case 117:
+				  if( temp_param2 < 3 ) uso_crc = temp_param2;
+				  break;
+				case 118:
+				  CRC_START_CCITT = temp_param2;
+				  break;
+				case 119:
+				  CRC_POLY_CCITT = temp_param2;
+				  init_crcccitt_tab();
+				  break;
+				case 120:
+				  K_P_LS = temp_param2;
+				  K_P_LS_f = (float)K_P_LS/100;
+				  break;
+				case 121:
+				  K_D_LS = temp_param2;
+				  K_D_LS_f = (float)K_D_LS/100;
+				  break;
+				case 122:
+				  K_I_LS = temp_param2;
+				  K_I_LS_f = (float)K_I_LS/10000;
+				  break;
+				case 123:
+				  K_P_M = temp_param2;
+				  K_P_M_f = (float)K_P_M/100;
+				  break;
+				case 124:
+				  K_D_M = temp_param2;
+				  K_D_M_f = (float)K_D_M/100;
+				  break;
+				case 125:
+				  K_I_M = temp_param2;
+				  K_I_M_f = (float)K_I_M/10000;
+				  break;
+				case 126:
+				  if(temp_param2 <= 1000) offset_corriente = temp_param2 / 9;
+				  break;
+				case 127:
+				  if(temp_param2 <= 150) offset_temp_int = temp_param2 / 10;
+				  break;
+				case 128:
+				  if(temp_param2 <= 150) offset_temp_ext = temp_param2 / 10;
+				  break;
+				case 129:
+				  if( temp_param2 < 3 ) envio_si_leo = temp_param2;
+				  break;
+				case 130:
+				  if( temp_param2 < 2 ) saludo_inicial = temp_param2;
+				  break;
+				case 131:
+				  min_posicion = temp_param2;
+				  break;
+				case 132:
+				  max_posicion = temp_param2;
+				  break;
+				case 133:
+				  if( temp_param2 < 2 ) limit_posicion = temp_param2;
+				  break;
+				case 134:
+				  t_ramp_t = temp_param2;
+				  break;
+				case 135:
+				  t_ramp_s = temp_param2;
+				  break;
+				case 136:
+				  a_ramp_t = temp_param2;
+				  break;
+				case 137:
+				  if(temp_param2 <= 1000) deadband = temp_param2;
+				  break;
+				case 138:
+				  if(temp_param2 == 0) direccion_motor = 0;
+				  else direccion_motor = 1;
+				  break;
+				  
+				default:
+				  break;
 			}
+			/*if (task_scheduler.param_1[LS_TS_ESTADO] >= 256 && task_scheduler.param_1[LS_TS_ESTADO] < 512)
+			{
+				correccion_enc[(task_scheduler.param_1[LS_TS_ESTADO]-256)] = temp_param2;
+			}*/
 		}
 		else
 		{
 			switch (task_scheduler.param_1[LS_TS_ESTADO])
 			{
-			  case 126:
-				if(temp_param2 >= -1000) offset_corriente = temp_param2 / 9;
-			  break;
-			  case 127:
-				if(temp_param2 >= -150) offset_temp_int = temp_param2 / 10;
-			  break;
-			  case 128:
-				if(temp_param2 >= -150) offset_temp_ext = temp_param2 / 10;
-			  break;
-			  case 131:
-				min_posicion = temp_param2;
-			  break;
-			  case 132:
-				max_posicion = temp_param2;
-			  break;
-			  default:
-			  break;
+				case 126:
+				  if(temp_param2 >= -1000) offset_corriente = temp_param2 / 9;
+				  break;
+				case 127:
+				  if(temp_param2 >= -150) offset_temp_int = temp_param2 / 10;
+				  break;
+				case 128:
+				  if(temp_param2 >= -150) offset_temp_ext = temp_param2 / 10;
+				  break;
+				case 131:
+				  min_posicion = temp_param2;
+				  break;
+				case 132:
+				  max_posicion = temp_param2;
+				  break;
+				  
+				default:
+				  break;
 			}
+			/*if (task_scheduler.param_1[LS_TS_ESTADO] >= 256 && task_scheduler.param_1[LS_TS_ESTADO] < 512)
+			{
+				correccion_enc[(task_scheduler.param_1[LS_TS_ESTADO]-256)] = temp_param2;
+			}*/
 		}
 	}
 	task_scheduler.iniciado[LS_TS_ESTADO] = 2;
