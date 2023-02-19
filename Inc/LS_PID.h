@@ -10,7 +10,7 @@
   * @attention
   *
   * LibreServo by Luis Picó is licensed under a Creative Commons 
-  * Attribution-NonCommercial-ShareAlike 4.0 International License
+  * Attribution-ShareAlike 4.0 International License
   *
   ******************************************************************************
   */
