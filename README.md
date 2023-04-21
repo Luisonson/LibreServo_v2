@@ -17,7 +17,7 @@ A few characteristics of LibreServo:
     LibreServo will generate their own curves (sine ramps, trapezoidal ramps, hermitian curves...)
     Current sensor: +-15A ACS711
 
-More info in <a href="https://www.libreservo.com/">LibreServo</a>.
+More info in <a href="https://www.libreservo.com/en">LibreServo</a>.
 
 <p align="center">
 <a href="http://creativecommons.org/licenses/by-sa/4.0/"><img src="https://user-images.githubusercontent.com/12425566/219942224-9a3bc76d-cd19-4feb-99f2-25e79919dd3e.png" alt="cc-by-sa"></a></p>
