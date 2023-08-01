@@ -16,8 +16,9 @@ A few characteristics of LibreServo:
     For the encoder I have designed 3D parts to substitute the potentiometer and used the same hole/space than the original.
     LibreServo will generate their own curves (sine ramps, trapezoidal ramps, hermitian curves...)
     Current sensor: +-15A ACS711
-
+Communication Protocol: <a href="https://www.libreservo.com/en/articulo/libreservo-commands-part-one">LibreServo Commands</a><BR>
 <img src="https://www.libreservo.com/sites/libreservo.com/files/imagenes/Main-Encoder-PCB.jpg" width="550" height="412">
+
 
 More info in <a href="https://www.libreservo.com/en">LibreServo</a>.
 
