@@ -1,0 +1,67 @@
+Partlist exported from LibreServo v2.3.1 at 08/07/2024 10:16 @ https://github.com/Luisonson/LibreServo_v2 @ https://www.libreservo.com/
+
+Part  Value               Device              Package           Description                          
+B1    700mA@600Ω@100MHz   PBY100505T-601Y-N   0402              340mΩ ±25% 600Ω@100MHz 0402 Ferrite Beads 700mA                                    
+B2    2A@600Ω@100MHz      VPB160808T-601Y-N   0603              100mΩ ±25% 600Ω@100MHz 0603 Ferrite Beads 2A                                     
+C1    4.7u                CM05X5R475M25AH     0402              25V 4.7uF X5R ±20% 0402 Multilayer Ceramic Capacitors MLCC                                     
+C2    100n                CL05B104KB54PNC     0402              50V 100nF X7R ±10% 0402 Multilayer Ceramic Capacitors MLCC                                     
+C3    100n                CL05B104KB54PNC     0402              50V 100nF X7R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C4    1u                  CL05A105KA5NQNC     0402              25V 1uF X5R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C5    100n                CL05B104KB54PNC     0402              50V 100nF X7R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C6    100n                CL05B104KB54PNC     0402              50V 100nF X7R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C7    10u                 CL10A106MA8NRNC     0603              25V 10uF X5R ±20% 0603 Multilayer Ceramic Capacitors MLCC
+C8    22u                 CL31A226KAHNNNE     1206              25V 22uF X5R ±10% 1206 Multilayer Ceramic Capacitors MLCC
+C9    1u                  CL05A105KA5NQNC     0402              25V 1uF X5R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C10   1u                  CL05A105KA5NQNC     0402              25V 1uF X5R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C11   100n                CL05B104KB54PNC     0402              50V 100nF X7R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C12   1u                  CL05A105KA5NQNC     0402              25V 1uF X5R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C13   1u                  CL05A105KA5NQNC     0402              25V 1uF X5R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C14   100n                CL05B104KB54PNC     0402              50V 100nF X7R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C15   1u                  CL05A105KA5NQNC     0402              25V 1uF X5R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C16   10u                 CL10A106MA8NRNC     0603              25V 10uF X5R ±20% 0603 Multilayer Ceramic Capacitors MLCC
+C17   10u                 CL10A106MA8NRNC     0603              25V 10uF X5R ±20% 0603 Multilayer Ceramic Capacitors MLCC
+C18   100n                CL05B104KB54PNC     0402              50V 100nF X7R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C19   100n                CL05B104KB54PNC     0402              50V 100nF X7R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C20   10n                 CL05B103KB5NNNC     0402              50V 10nF X7R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C21   10n                 CL05B103KB5NNNC     0402              50V 10nF X7R ±10% 0402 Multilayer Ceramic Capacitors MLCC
+C22   220uF               ERS1EM221E11OT      E2,5-6_MIN        220uF 25V 220mΩ@100kHz ±20% 340mA@100kHz Plugin,D6.3xL11mm Aluminum Electrolytic Capacitors - Leaded
+C23   10u                 CL10A106MA8NRNC     0603              25V 10uF X5R ±20% 0603 Multilayer Ceramic Capacitors MLCC
+C24   10u                 CL10A106MA8NRNC     0603              25V 10uF X5R ±20% 0603 Multilayer Ceramic Capacitors MLCC
+M1    P5103EMA            P5103EMA            SOT23             P Channel 30V 3.8A 1W 85mΩ@4.5V,3.5A SOT-23(TO-236)                                     
+M2    MOSFET_N+P          WSD3069DN56         DFN5X6            30V 16A 15mΩ@10V,10A 1.5V@250uA 1PCSNChannel+1PCSPChannel DFN-8(5.2x5.5)
+M3    MOSFET_N+P          WSD3069DN56         DFN5X6            30V 16A 15mΩ@10V,10A 1.5V@250uA 1PCSNChannel+1PCSPChannel DFN-8(5.2x5.5)
+M4    FAN3227/4           FAN3227TMPX         MLP8              Low Side 2 MOSFET 3A 12ns 9ns 4.5V~18V 3A WDFN-8(3x3) Gate Drivers
+M5    FAN3227/4           FAN3227TMPX         MLP8              Low Side 2 MOSFET 3A 12ns 9ns 4.5V~18V 3A WDFN-8(3x3) Gate Drivers
+NTC   10K@3380K NTC       NTCG063JF103FTB     0402_MIN          10kΩ 310uA 100mW ±1% 3380K ±1% 0201 NTC Thermistors
+R1    12.5K               0402WGF1252TCE      0402              62.5mW Thick Film Resistors 50V ±100ppm/ºC ±1% 12.5kΩ 0402
+R2    47K                 0402WGF4702TCE      0402              62.5mW Thick Film Resistors 50V ±100ppm/ºC ±1% 47kΩ 0402
+R3    150K                0402WGF1503TCE      0402              62.5mW Thick Film Resistors 50V ±100ppm/ºC ±1% 150kΩ 0402
+R4    10K                 0402WGF1002TCE      0402              62.5mW 10kΩ 50V Thick Film Resistors ±1% ±100ppm/ºC 0402
+R5    51K                 TR0402B51K0Q1050Z   0402              63mW Thin Film Resistor 25V ±50ppm/ºC ±0.1% 51kΩ 0402
+R6    187                 RC0402FR-07187RL    0402              62.5mW Thick Film Resistors 50V ±100ppm/ºC ±1% 187Ω 0402
+R7    270                 0402WGF2700TCE      0402              62.5mW Thick Film Resistors 50V ±100ppm/ºC ±1% 270Ω 0402
+R8    309                 CQ02WGF3090TCE      0402              62.5mW 50V ±100ppm/ºC ±1% 309Ω 0402
+R9    10K                 0402WGF1002TCE      0402              62.5mW 10kΩ 50V Thick Film Resistors ±1% ±100ppm/ºC 0402
+R10   1.1k                0402WGF1101TCE      0402              62.5mW Thick Film Resistors 50V ±100ppm/ºC ±1% 1.1kΩ 0402
+R11   10K                 0402WGF1002TCE      0402              62.5mW 10kΩ 50V Thick Film Resistors ±1% ±100ppm/ºC 0402
+R12   10K                 0402WGF1002TCE      0402              62.5mW 10kΩ 50V Thick Film Resistors ±1% ±100ppm/ºC 0402
+R13   6                   WR04W6R04FTL        0402              62.5mW Thick Film Resistors 50V -200ppm/ºC 400ppm/ºC ±1% 6.04Ω 0402
+R14   6                   WR04W6R04FTL        0402              62.5mW Thick Film Resistors 50V -200ppm/ºC 400ppm/ºC ±1% 6.04Ω 0402
+R15   6                   WR04W6R04FTL        0402              62.5mW Thick Film Resistors 50V -200ppm/ºC 400ppm/ºC ±1% 6.04Ω 0402
+R16   6                   WR04W6R04FTL        0402              62.5mW Thick Film Resistors 50V -200ppm/ºC 400ppm/ºC ±1% 6.04Ω 0402
+R17   10K                 0402WGF1002TCE      0402              62.5mW 10kΩ 50V Thick Film Resistors ±1% ±100ppm/ºC 0402
+R18   10K                 0402WGF1002TCE      0402              62.5mW 10kΩ 50V Thick Film Resistors ±1% ±100ppm/ºC 0402
+R19   10K                 0402WGF1002TCE      0402              62.5mW 10kΩ 50V Thick Film Resistors ±1% ±100ppm/ºC 0402
+R20   10K                 0402WGF1002TCE      0402              62.5mW 10kΩ 50V Thick Film Resistors ±1% ±100ppm/ºC 0402
+RGB   LED_RGB_PLCC4_2.2X2 ASMB-KTF0-0A306     PLCC-4_2.2X2      SMD-4P,2x2.2mm Light Emitting Diodes (LED RGB)                                          
+U$3   FFC-5               THD0510-05CL-GF     FFC-5-0.5         Clamshell 5P Bottom Contact Surface Mount，Right Angle 0.5mm SMD,P=0.5mm,Surface Mount，Right Angle FFC/FPC
+U$4   FFC-5               THD0510-05CL-GF     FFC-5-0.5         Clamshell 5P Bottom Contact Surface Mount，Right Angle 0.5mm SMD,P=0.5mm,Surface Mount，Right Angle FFC/FPC
+U$8   JST_PH-4_HOLEB      PH-4A               JST_PH-4_HOLE_B   1x4P 4P PH 1 2mm 4 Plugin,P=2mm Wire To Board Connector
+U$9   JST_PH-4_HOLEB      PH-4A               JST_PH-4_HOLE_B   1x4P 4P PH 1 2mm 4 Plugin,P=2mm Wire To Board Connector
+U$100 OSCILATOR@8MHz      SX1M8.000M10F30TNN  OSC-2X1.6         1.62V~3.63V ±10ppm 10mA ±30ppm CMOS 8MHz SMD2016-4P Oscillators
+U1    STM32F301/2         STM32F301K8U6       QFN32             64KB 2V~3.6V ARM-M4 16KB 72MHz FLASH 24 UFQFPN-32(5x5) Microcontrollers
+U2    MPM3610             MPM3610AGQV         MPM36XX           QFN-20(3x5) DC-DC Power Modules
+U3    AP2112              AP2112K-3.3TRG1     SOT25             65dB@(100Hz,1kHz) 600mA Fixed 3.3V Positive electrode 6V SOT-25-5 Voltage Regulators - Linear, Low Drop Out (LDO) Regulators
+U4    ACS711              ACS711KEXLT-15AB-T  ACS711-QFN        ±15.5A QFN-12(3x3) Current Sensors
+U5    SIT3485             SIT3485EUA          MSOP-8            transceiver 12Mbps 1/1 MSOP-8 RS-485/RS-422 ICs
+U10   AEAT-8800           AEAT-8800-Q24       QFN24             Encoders Prog 16Bits IC Magnetic Encoder
